@@ -7,6 +7,9 @@ canvas {
     border:1px solid #d3d3d3;
     background-color: #f1f1f1;
 }
+button {
+    margin: 5px;
+}
 </style>
 </head>
 <body onload="startGame()">
@@ -15,10 +18,12 @@ canvas {
 var myGamePiece;
 var myObstacles = [];
 var myScore;
+var isPaused = false;
 
 function startGame() {
     myGamePiece = new component(30, 30, "red", 10, 120);
     myScore = new component("30px", "Consolas", "black", 280, 40, "text");
+    myObstacles = []; // Reset obstacles when the game starts
     myGameArea.start();
 }
 
@@ -46,6 +51,19 @@ var myGameArea = {
     },
     stop : function() {
         clearInterval(this.interval);
+    },
+    pause : function() {
+        if (!isPaused) {
+            clearInterval(this.interval);
+            isPaused = true;
+        } else {
+            this.interval = setInterval(updateGameArea, 20);
+            isPaused = false;
+        }
+    },
+    reset : function() {
+        this.stop();
+        startGame(); // Restart the game
     }
 }
 
@@ -96,6 +114,8 @@ function component(width, height, color, x, y, type) {
 }
 
 function updateGameArea() {
+    if (isPaused) return; // Don't update if the game is paused
+
     var x, height, gap, minHeight, maxHeight, minGap, maxGap;
 
     // Check for crashes with obstacles
@@ -151,5 +171,12 @@ function everyinterval(n) {
 }
 
 </script>
+
+<!-- Add Pause and Restart buttons -->
+<div style="text-align: center;">
+    <button onclick="myGameArea.pause()">Pause/Resume</button>
+    <button onclick="myGameArea.reset()">Restart</button>
+</div>
+
 </body>
 </html>
