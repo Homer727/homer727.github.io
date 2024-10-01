@@ -1,26 +1,41 @@
+<p id="demo">??????  </p>
 
 <table>
 
-  <tr>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <tr>
+  <tr id="table1"> 
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    
+  </tr>
 
-  <tr>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <td> 1 </td>
-  <tr>
-
+    <tr> 
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    <td> 1 </td>
+    
+  </tr>
 </table>
+
+<script >
+  document.getElementById("demo").innerHTML = "Hello Oneonta!";
+
+  tableref=document.getElementById("table1");
+ var row = tableref.insertRow(0);
+
+  for(col=0; col<16; col++)
+    {
+      var cellref=row.insertCell(col)
+      cellref.innerHTML=col
+    }
+</script>
