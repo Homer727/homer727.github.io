@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <style>
 canvas {
-    border:1px solid #d3d3d3;
+    border: 1px solid #d3d3d3;
     background-color: #f1f1f1;
 }
 button {
@@ -18,21 +18,22 @@ button {
 var myGamePiece;
 var myObstacles = [];
 var myScore;
+var background;
 var isPaused = false;
-var backgroundImage;
-var backgroundX = 0; // To loop the background
 
 function startGame() {
-    myGamePiece = new component(30, 30, "Spaceship.png", 10, 120, "image");
+    // Create game piece with spaceship image
+    myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
+    // Create background with looping image
+    background = new component(480, 270, "background", 0, 0, "Background.jpeg");
     myScore = new component("30px", "Consolas", "black", 280, 40, "text");
-    backgroundImage = new component(myGameArea.canvas.width, myGameArea.canvas.height, "Background.jpeg", 0, 0, "background");
     myObstacles = []; // Reset obstacles when the game starts
     myGameArea.start();
 }
 
 var myGameArea = {
-    canvas : document.createElement("canvas"),
-    start : function() {
+    canvas: document.createElement("canvas"),
+    start: function() {
         this.canvas.width = 480;
         this.canvas.height = 270;
         this.context = this.canvas.getContext("2d");
@@ -41,21 +42,21 @@ var myGameArea = {
         this.interval = setInterval(updateGameArea, 20);
         
         // Add event listeners for keyboard input
-        window.addEventListener('keydown', function (e) {
+        window.addEventListener('keydown', function(e) {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = true;
-        })
-        window.addEventListener('keyup', function (e) {
+        });
+        window.addEventListener('keyup', function(e) {
             myGameArea.keys[e.keyCode] = false;
-        })
+        });
     },
-    clear : function() {
+    clear: function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
-    stop : function() {
+    stop: function() {
         clearInterval(this.interval);
     },
-    pause : function() {
+    pause: function() {
         if (!isPaused) {
             clearInterval(this.interval);
             isPaused = true;
@@ -64,47 +65,85 @@ var myGameArea = {
             isPaused = false;
         }
     },
-    reset : function() {
+    reset: function() {
         this.stop();
         startGame(); // Restart the game
     }
-}
+};
 
-function component(width, height, color, x, y, type) {
+function component(width, height, type, x, y, src) {
     this.type = type;
-    this.width = width;
-    this.height = height;
-    this.speedX = 0;
-    this.speedY = 0;    
-    this.x = x;
-    this.y = y;    
-    
-    if (type == "image" || type == "background") {
+    if (type === "image" || type === "background") {
         this.image = new Image();
-        this.image.src = color;
+        this.image.src = src;
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
+        this.speedX = 0;
+        this.speedY = 0;
         this.update = function() {
             ctx = myGameArea.context;
-            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-        }
-    } else if (type == "text") {
+            if (type === "background") {
+                // Looping background logic
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
+            } else {
+                // Spaceship or obstacle image
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            }
+        };
+        this.newPos = function() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (type === "background") {
+                // Move background to the left to create scrolling effect
+                if (this.x <= -this.width) {
+                    this.x = 0;
+                }
+            }
+        };
+    } else if (type === "text") {
         this.text = "";
+        this.x = x;
+        this.y = y;
         this.update = function() {
             ctx = myGameArea.context;
             ctx.font = width + " " + height;
-            ctx.fillStyle = color;
+            ctx.fillStyle = src;
             ctx.fillText(this.text, this.x, this.y);
-        }
+        };
     } else {
+        this.width = width;
+        this.height = height;
+        this.speedX = 0;
+        this.speedY = 0;
+        this.x = x;
+        this.y = y;
         this.update = function() {
             ctx = myGameArea.context;
-            ctx.fillStyle = color;
+            ctx.fillStyle = src;
             ctx.fillRect(this.x, this.y, this.width, this.height);
-        }
-    }
-
-    this.newPos = function() {
-        this.x += this.speedX;
-        this.y += this.speedY;        
+        };
+        this.newPos = function() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+        };
+        this.crashWith = function(otherobj) {
+            var myleft = this.x;
+            var myright = this.x + this.width;
+            var mytop = this.y;
+            var mybottom = this.y + this.height;
+            var otherleft = otherobj.x;
+            var otherright = otherobj.x + otherobj.width;
+            var othertop = otherobj.y;
+            var otherbottom = otherobj.y + otherobj.height;
+            var crash = true;
+            if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+                crash = false;
+            }
+            return crash;
+        };
     }
 }
 
@@ -118,23 +157,16 @@ function updateGameArea() {
         if (myGamePiece.crashWith(myObstacles[i])) {
             myGameArea.stop();
             return;
-        } 
+        }
     }
 
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
-    // Loop the background by shifting its x position
-    backgroundX -= 1;
-    if (backgroundX <= -myGameArea.canvas.width) {
-        backgroundX = 0; // Reset the background position
-    }
-    backgroundImage.x = backgroundX;
-    backgroundImage.update();
-    
-    // Draw a second background to create a seamless loop
-    backgroundImage.x = backgroundX + myGameArea.canvas.width;
-    backgroundImage.update();
+    // Update background and make it scroll
+    background.speedX = -1;
+    background.newPos();
+    background.update();
 
     // Generate obstacles at regular intervals
     if (myGameArea.frameNo == 1 || everyinterval(150)) {
