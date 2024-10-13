@@ -73,40 +73,34 @@ var myGameArea = {
 
 function component(width, height, type, x, y, src) {
     this.type = type;
+    this.width = width;
+    this.height = height;
+    this.x = x;
+    this.y = y;
+    this.speedX = 0;
+    this.speedY = 0;
+
     if (type === "image" || type === "background") {
         this.image = new Image();
         this.image.src = src;
-        this.width = width;
-        this.height = height;
-        this.x = x;
-        this.y = y;
-        this.speedX = 0;
-        this.speedY = 0;
-        this.update = function() {
-            ctx = myGameArea.context;
-            if (type === "background") {
-                // Looping background logic
-                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
-            } else {
-                // Spaceship or obstacle image
-                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-            }
+        this.image.onload = () => {
+            this.loaded = true;
         };
-        this.newPos = function() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            if (type === "background") {
-                // Move background to the left to create scrolling effect
-                if (this.x <= -this.width) {
-                    this.x = 0;
+        this.update = function() {
+            if (this.loaded) {
+                ctx = myGameArea.context;
+                if (type === "background") {
+                    // Looping background logic
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                    ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
+                } else {
+                    // Spaceship image
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 }
             }
         };
     } else if (type === "text") {
         this.text = "";
-        this.x = x;
-        this.y = y;
         this.update = function() {
             ctx = myGameArea.context;
             ctx.font = width + " " + height;
@@ -114,37 +108,40 @@ function component(width, height, type, x, y, src) {
             ctx.fillText(this.text, this.x, this.y);
         };
     } else {
-        this.width = width;
-        this.height = height;
-        this.speedX = 0;
-        this.speedY = 0;
-        this.x = x;
-        this.y = y;
         this.update = function() {
             ctx = myGameArea.context;
             ctx.fillStyle = src;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         };
-        this.newPos = function() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-        };
-        this.crashWith = function(otherobj) {
-            var myleft = this.x;
-            var myright = this.x + this.width;
-            var mytop = this.y;
-            var mybottom = this.y + this.height;
-            var otherleft = otherobj.x;
-            var otherright = otherobj.x + otherobj.width;
-            var othertop = otherobj.y;
-            var otherbottom = otherobj.y + otherobj.height;
-            var crash = true;
-            if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
-                crash = false;
-            }
-            return crash;
-        };
     }
+
+    this.newPos = function() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (type === "background") {
+            // Move background to the left to create scrolling effect
+            if (this.x <= -this.width) {
+                this.x = 0;
+            }
+        }
+    };
+
+    this.crashWith = function(otherobj) {
+        var myleft = this.x;
+        var myright = this.x + this.width;
+        var mytop = this.y;
+        var mybottom = this.y + this.height;
+        var otherleft = otherobj.x;
+        var otherright = otherobj.x + otherobj.width;
+        var othertop = otherobj.y;
+        var otherbottom = otherobj.y + otherobj.height;
+        var crash = true;
+        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+            crash = false;
+        }
+        return crash;
+    };
 }
 
 function updateGameArea() {
