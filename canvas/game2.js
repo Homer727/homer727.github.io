@@ -165,21 +165,21 @@ function updateGameArea() {
     {
         myGamePiece.speedX=0;
         myGamePiece.speedY=0;
-        myGamePiece.image.src = "./game1assets/helicopter.png";
+        myGamePiece.image.src = ".Spaceship.png";
     }
     else{
     switch (myGameArea.key)
     {
         case 37:
             myGamePiece.speedX = -4;
-            myGamePiece.image.src = "./game1assets/helicopter_backwards.png";
+            myGamePiece.image.src = ".Spaceship.png";
             break;
         case 38:
             myGamePiece.speedY = -4;
             break;
         case 39:
             myGamePiece.speedX = 4;
-            myGamePiece.image.src = "./game1assets/helicopter.png";
+            myGamePiece.image.src = "./Spaceship.png";
             break;
         case 40:
             myGamePiece.speedY = 4;
@@ -287,7 +287,6 @@ function Pause()
 function Restart()
 {
     myObstacles =[];
-    Coins = [];
     myScore.text = "SCORE: 0"
     collected = 0;
     myGameArea.frameNo = 0;
