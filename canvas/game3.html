@@ -26,7 +26,7 @@ function startGame() {
     myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
     // Create background with looping image
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
-    myScore = new component("30px", "Consolas", "white", 280, 40, "text");
+    myScore = new component("30px", "Consolas", "black", 280, 40, "text");
     myObstacles = []; // Reset obstacles when the game starts
     myGameArea.start();
 }
@@ -184,21 +184,13 @@ function updateGameArea() {
         myObstacles[i].update();
     }
 
-    // Update the score
-    myScore.text = "SCORE: " + myGameArea.frameNo;
-    myScore.update();
-
-    // Control the game piece movement with arrow keys
-    myGamePiece.speedX = 0;
-    myGamePiece.speedY = 0;
-    if (myGameArea.keys && myGameArea.keys[37]) { myGamePiece.speedX = -1; } // Left arrow
-    if (myGameArea.keys && myGameArea.keys[39]) { myGamePiece.speedX = 1; }  // Right arrow
-    if (myGameArea.keys && myGameArea.keys[38]) { myGamePiece.speedY = -1; } // Up arrow
-    if (myGameArea.keys && myGameArea.keys[40]) { myGamePiece.speedY = 1; }  // Down arrow
-
     // Update the game piece's position and render it
     myGamePiece.newPos();
     myGamePiece.update();
+
+    // Render the score last to ensure it's on top
+    myScore.text = "SCORE: " + myGameArea.frameNo;
+    myScore.update();
 }
 
 function everyinterval(n) {
