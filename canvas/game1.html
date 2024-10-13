@@ -21,7 +21,7 @@ var myScore;
 var isPaused = false;
 
 function startGame() {
-    myGamePiece = new component(30, 30, "red", 10, 120);
+    myGamePiece = new component(30, 30, "Spaceship.png", 10, 120);
     myScore = new component("30px", "Consolas", "black", 280, 40, "text");
     myObstacles = []; // Reset obstacles when the game starts
     myGameArea.start();
@@ -138,8 +138,8 @@ function updateGameArea() {
         minGap = 50;
         maxGap = 200;
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-        myObstacles.push(new component(10, height, "green", x, 0));
-        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
+        myObstacles.push(new component(10, height, "red", x, 0));
+        myObstacles.push(new component(10, x - height - gap, "red", x, height + gap));
     }
 
     // Update obstacle positions
