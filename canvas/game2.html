@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+}
+#Pause_Button
+{
+    display: none;
+}
+#Start_Button
+{
+    display: block;
+}
+#Restart_Button
+{
+    display: none;
+}
+</style>
+</head>
+<body>
+<script src="game2.js"></script>
+<br>
+
+
+<button onclick="click_start()" id="Start_Button">Start Game</button>
+<button onclick="Pause(); PlayingToggle()" id="Pause_Button">Pause Game/Resume Game</button>
+<button onclick="Restart()" id ="Restart_Button">Restart Game</button>
+<audio id="hit_audio" src="./game1assets/hit-by-a-wood.mp3" ></audio>
+<audio id="music" src="./Local Forecast - Elevator.mp3" loop></audio>
+
+
+<p>Use the arrow keys to move through the obstacles</p> 
+<p>How long can you stay alive? <br> How many coins can you collect?</p>
+<h4>Each coin is worth 50 points</h6>
+</body>
+</html>
