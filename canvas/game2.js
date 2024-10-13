@@ -3,7 +3,6 @@ var myObstacles = [];
 var myScore;
 var Paused = false;
 var PlayingAudio = true;
-var Coins = [];
 var collected = 0;
 //Initialize needed variables
 
