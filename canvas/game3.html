@@ -184,13 +184,21 @@ function updateGameArea() {
         myObstacles[i].update();
     }
 
+    // Update the score
+    myScore.text = "SCORE: " + myGameArea.frameNo;
+    myScore.update();
+
+    // Control the game piece movement with arrow keys
+    myGamePiece.speedX = 0;
+    myGamePiece.speedY = 0;
+    if (myGameArea.keys && myGameArea.keys[37]) { myGamePiece.speedX = -1; } // Left arrow
+    if (myGameArea.keys && myGameArea.keys[39]) { myGamePiece.speedX = 1; }  // Right arrow
+    if (myGameArea.keys && myGameArea.keys[38]) { myGamePiece.speedY = -1; } // Up arrow
+    if (myGameArea.keys && myGameArea.keys[40]) { myGamePiece.speedY = 1; }  // Down arrow
+
     // Update the game piece's position and render it
     myGamePiece.newPos();
     myGamePiece.update();
-
-    // Render the score last to ensure it's on top
-    myScore.text = "SCORE: " + myGameArea.frameNo;
-    myScore.update();
 }
 
 function everyinterval(n) {
@@ -201,7 +209,7 @@ function everyinterval(n) {
 </script>
 
 <!-- Add Pause and Restart buttons -->
-<div style="text-align: center;">
+<div style="text-align: left;">
     <button onclick="myGameArea.pause()">Pause/Resume</button>
     <button onclick="myGameArea.reset()">Restart</button>
 </div>
