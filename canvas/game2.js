@@ -193,7 +193,7 @@ function updateGameArea() {
         if (myGamePiece.crashWith(myObstacles[i]))
         {
             hit_sound.play();
-            explosion = new gameObject(200, 200, "./game1assets/explosion.png", myGamePiece.x - 50, myGamePiece.y -60,"image");
+            explosion = new gameObject(200, 200, ".Explosion.png", myGamePiece.x - 50, myGamePiece.y -60,"image");
             explosion.update();
             setTimeout(function()
         {
@@ -206,24 +206,7 @@ function updateGameArea() {
         } 
     }
     //Other object to crash with is the obstacles and if the game object does, an explosion is spawned over the player and a hit sound plays while showing the restart button and the game stops 
-    for (i = 0; i < Coins.length; i += 1) {
-        if (myGamePiece.crashWith(Coins[i]))
-        {
-            collected +=1;
-            myCoins.text ="COINS: " + collected;
-
-            myGameArea.frameNo += 50;
-            myScore.text = "SCORE: " + myGameArea.frameNo;
-
-
-            Coins.splice(i, 1);
-            coin_sound.currentTime = 0;
-            coin_sound.play();
-            i--;
-
-
-        } 
-    }
+ 
     //ther object to crash with is the coins and after collision the coins value increases by 1, the coin despawns, and the score is increased by 50
     myGameArea.clear();
     myGameArea.frameNo += 1;
