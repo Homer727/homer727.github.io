@@ -11,19 +11,16 @@ document.addEventListener("DOMContentLoaded", function() {
     hit_sound = document.getElementById("hit_audio");
     Music = document.getElementById("music");
     start_sound = document.getElementById("start_audio");
-    coin_sound = document.getElementById("coin_noise");
 });
 //Load audio elements to be used as the page loads
 
 function startGame() {
     
-    myGamePiece = new gameObject(50, 30, "./game1assets/helicopter.png", 20, 150,"image");
+    myGamePiece = new gameObject(50, 30, "./Spaceship.png", 20, 150,"image");
     myScore = new gameObject("30px", "Consolas", "black", 280, 40, "text");
-    myCoins = new gameObject("30px", "Consolas", "black", 280, 65, "text");
     
-    myCoins.text = "COINS: 0";
 
-    Background = new gameObject(700,320,"./game1assets/Background.jpg",0,0,"background")
+    Background = new gameObject(700,320,"./Background.jpeg",0,0,"background")
     myGameArea.start();
 
     start_sound.play();
@@ -257,14 +254,10 @@ function updateGameArea() {
         myObstacles[i].x += -6;
         myObstacles[i].update();
     }
-    for (i = 0; i < Coins.length; i += 1) {
-        Coins[i].x += -6;
-        Coins[i].update();
-    }
+  
     //Update obstacles and coins 
     myScore.text="SCORE: " + myGameArea.frameNo;
     myScore.update();
-    myCoins.update();
     myGamePiece.newPos();
     myGamePiece.update();  
    
@@ -298,7 +291,6 @@ function Restart()
     myObstacles =[];
     Coins = [];
     myScore.text = "SCORE: 0"
-    myCoins.text = "COINS: 0"
     collected = 0;
     myGameArea.frameNo = 0;
     Paused = false;
