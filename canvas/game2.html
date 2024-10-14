@@ -17,18 +17,20 @@
         }
     </style>
 </head>
-<body onload="startGame()">
-<script src="game2.js"></script>
-<br>
+<body>
+    <br>
+    <button onclick="startGame()" id="Start_Button">Start Game</button>
+    <button onclick="myGameArea.pause()" id="Pause_Button">Pause Game/Resume Game</button>
+    <button onclick="myGameArea.reset()" id="Restart_Button">Restart Game</button>
+    <audio id="music" src="./Local Forecast - Elevator.mp3" loop></audio>
 
+    <p>Michael Muratori - Canvas Game</p> 
+    <h4>Press the Start Button to Start the Game</h4>
 
-<button onclick="click_start()" id="Start_Button">Start Game</button>
-<button onclick="Pause(); PlayingToggle()" id="Pause_Button">Pause Game/Resume Game</button>
-<button onclick="Restart()" id ="Restart_Button">Restart Game</button>
-<audio id="music" src="./Local Forecast - Elevator.mp3" loop></audio>
+    <!-- Score Display -->
+    <div id="scoreDisplay">SCORE: 0</div>
 
-
-<p>Michael Muratori - Canvas Game</p> 
-<h4>Press the Start Button to Start the Game</h6>
+    <!-- JavaScript File -->
+    <script src="game2.js"></script>
 </body>
 </html>
