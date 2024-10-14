@@ -81,7 +81,6 @@ var myGameArea = {
 function loadExplosionResources() {
     explosionImage = new Image();
     explosionImage.src = "Explosion.png";
-
     explosionSound = new Audio("Explosion Sound Effect.mp3");
 }
 
@@ -94,10 +93,7 @@ function component(width, height, type, x, y, src) {
     this.speedX = 0;
     this.speedY = 0;
 
-    // Context defined here to avoid issues
-    const ctx = myGameArea.context;
-
-    if (type == "image" || type == "background") {
+    if (type === "image" || type === "background") {
         this.image = new Image();
         this.image.src = src;
         this.image.onload = () => {
@@ -105,23 +101,28 @@ function component(width, height, type, x, y, src) {
         };
         this.update = function() {
             if (this.loaded) {
-                if (type == "background") {
+                ctx = myGameArea.context;
+                if (type === "background") {
+                    // Looping background logic
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                     ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
                 } else {
+                    // Spaceship image
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 }
             }
         };
-    } else if (type == "text") {
+    } else if (type === "text") {
         this.text = "";
         this.update = function() {
-            ctx.font = width + " " + height;
-            ctx.fillStyle = src; 
-            ctx.fillText(this.text, this.x, this.y); 
+            ctx = myGameArea.context;
+            ctx.font = width + " " + height; // Set font size and font-family
+            ctx.fillStyle = src; // src is the text color (white)
+            ctx.fillText(this.text, this.x, this.y); // Draw the text at specified position
         };
     } else {
         this.update = function() {
+            ctx = myGameArea.context;
             ctx.fillStyle = src;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         };
@@ -131,7 +132,8 @@ function component(width, height, type, x, y, src) {
         this.x += this.speedX;
         this.y += this.speedY;
 
-        if (type == "background") {
+        if (type === "background") {
+            // Move background to the left to create scrolling effect
             if (this.x <= -this.width) {
                 this.x = 0;
             }
@@ -147,18 +149,23 @@ function component(width, height, type, x, y, src) {
         var otherright = otherobj.x + otherobj.width;
         var othertop = otherobj.y;
         var otherbottom = otherobj.y + otherobj.height;
-        return !((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright));
+        var crash = true;
+        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+            crash = false;
+        }
+        return crash;
     };
 }
 
 function updateGameArea() {
-    if (isPaused) return;
+    if (isPaused) return; // Don't update if the game is paused
 
     var x, height, gap, minHeight, maxHeight, minGap, maxGap;
 
+    // Check for crashes with obstacles
     for (i = 0; i < myObstacles.length; i += 1) {
         if (myGamePiece.crashWith(myObstacles[i])) {
-            playExplosionEffect();
+            playExplosionEffect(); // Play explosion effect
             myGameArea.stop();
             return;
         }
@@ -167,10 +174,12 @@ function updateGameArea() {
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
+    // Update background and make it scroll
     background.speedX = -1;
     background.newPos();
     background.update();
 
+    // Generate obstacles at regular intervals
     if (myGameArea.frameNo == 1 || everyinterval(150)) {
         x = myGameArea.canvas.width;
         minHeight = 20;
@@ -183,11 +192,13 @@ function updateGameArea() {
         myObstacles.push(new component(10, x - height - gap, "red", x, height + gap));
     }
 
+    // Update obstacle positions
     for (i = 0; i < myObstacles.length; i += 1) {
         myObstacles[i].x += -1;
         myObstacles[i].update();
     }
 
+    // Control the game piece movement with arrow keys
     myGamePiece.speedX = 0;
     myGamePiece.speedY = 0;
     if (myGameArea.keys && myGameArea.keys[37]) { myGamePiece.speedX = -1; } // Left arrow
@@ -195,21 +206,24 @@ function updateGameArea() {
     if (myGameArea.keys && myGameArea.keys[38]) { myGamePiece.speedY = -1; } // Up arrow
     if (myGameArea.keys && myGameArea.keys[40]) { myGamePiece.speedY = 1; }  // Down arrow
 
+    // Update the game piece's position and render it
     myGamePiece.newPos();
     myGamePiece.update();
 
+    // Update and render the score after everything else
     myScore.text = "SCORE: " + myGameArea.frameNo; // Update score text
     myScore.update(); // Draw score
 }
 
 function everyinterval(n) {
-    return (myGameArea.frameNo / n) % 1 === 0; // Improved condition
+    if ((myGameArea.frameNo / n) % 1 == 0) { return true; }
+    return false;
 }
 
 function playBackgroundMusic() {
     if (!backgroundMusic) {
         backgroundMusic = new Audio("Local Forecast - Elevator.mp3");
-        backgroundMusic.loop = true;
+        backgroundMusic.loop = true; // Loop the music
     }
     backgroundMusic.play();
 }
@@ -217,7 +231,7 @@ function playBackgroundMusic() {
 function stopBackgroundMusic() {
     if (backgroundMusic) {
         backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
+        backgroundMusic.currentTime = 0; // Reset to the start of the track
     }
 }
 
@@ -228,9 +242,12 @@ function pauseBackgroundMusic() {
 }
 
 function playExplosionEffect() {
+    // Play explosion sound
     if (explosionSound) {
         explosionSound.play();
     }
+
+    // Draw explosion image at the ship's position
     myGameArea.context.drawImage(explosionImage, myGamePiece.x - 25, myGamePiece.y - 25, 100, 100);
 }
 
