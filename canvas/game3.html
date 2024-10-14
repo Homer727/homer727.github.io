@@ -10,9 +10,15 @@
         button {
             margin: 5px;
         }
+        #scoreDisplay {
+            font-family: Consolas;
+            font-size: 30px;
+            color: white;
+        }
     </style>
 </head>
 <body onload="startGame()">
+
 <script>
 
 var myGamePiece;
@@ -25,13 +31,8 @@ var explosionImage;
 var explosionSound;
 
 function startGame() {
-    // Create game piece with spaceship image
     myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
-    // Create background with looping image
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
-    // Score positioned in the top-right (x: canvas width - offset)
-    myScore = new component("30px", "Consolas", "white", 280, 40, "text");
-    myScore.text = "SCORE: 0"; // Initialize score text
     myObstacles = []; // Reset obstacles when the game starts
     loadExplosionResources(); // Load explosion resources
     myGameArea.start();
@@ -48,7 +49,6 @@ var myGameArea = {
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
         
-        // Add event listeners for keyboard input
         window.addEventListener('keydown', function(e) {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = true;
@@ -62,16 +62,16 @@ var myGameArea = {
     },
     stop: function() {
         clearInterval(this.interval);
-        stopBackgroundMusic(); // Stop the music when the game stops
+        stopBackgroundMusic();
     },
     pause: function() {
         if (!isPaused) {
             clearInterval(this.interval);
-            pauseBackgroundMusic(); // Pause the music when the game is paused
+            pauseBackgroundMusic();
             isPaused = true;
         } else {
             this.interval = setInterval(updateGameArea, 20);
-            playBackgroundMusic(); // Resume music when game is unpaused
+            playBackgroundMusic();
             isPaused = false;
         }
     },
@@ -82,11 +82,9 @@ var myGameArea = {
 };
 
 function loadExplosionResources() {
-    // Load explosion image
     explosionImage = new Image();
     explosionImage.src = "Explosion.png";
 
-    // Load explosion sound
     explosionSound = new Audio("Explosion Sound Effect.mp3");
 }
 
@@ -109,22 +107,12 @@ function component(width, height, type, x, y, src) {
             if (this.loaded) {
                 ctx = myGameArea.context;
                 if (type === "background") {
-                    // Looping background logic
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                     ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
                 } else {
-                    // Spaceship image
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 }
             }
-        };
-    } else if (type === "text") {
-        this.text = "";
-        this.update = function() {
-            ctx = myGameArea.context;
-            ctx.font = width + " " + height; // Set font size and font-family
-            ctx.fillStyle = src; // src is the text color (white)
-            ctx.fillText(this.text, this.x, this.y); // Draw the text at specified position
         };
     } else {
         this.update = function() {
@@ -139,7 +127,6 @@ function component(width, height, type, x, y, src) {
         this.y += this.speedY;
 
         if (type === "background") {
-            // Move background to the left to create scrolling effect
             if (this.x <= -this.width) {
                 this.x = 0;
             }
@@ -164,14 +151,13 @@ function component(width, height, type, x, y, src) {
 }
 
 function updateGameArea() {
-    if (isPaused) return; // Don't update if the game is paused
+    if (isPaused) return;
 
     var x, height, gap, minHeight, maxHeight, minGap, maxGap;
 
-    // Check for crashes with obstacles
     for (i = 0; i < myObstacles.length; i += 1) {
         if (myGamePiece.crashWith(myObstacles[i])) {
-            playExplosionEffect(); // Play explosion effect
+            playExplosionEffect();
             myGameArea.stop();
             return;
         }
@@ -180,12 +166,10 @@ function updateGameArea() {
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
-    // Update background and make it scroll
     background.speedX = -1;
     background.newPos();
     background.update();
 
-    // Generate obstacles at regular intervals
     if (myGameArea.frameNo == 1 || everyinterval(150)) {
         x = myGameArea.canvas.width;
         minHeight = 20;
@@ -198,13 +182,11 @@ function updateGameArea() {
         myObstacles.push(new component(10, x - height - gap, "red", x, height + gap));
     }
 
-    // Update obstacle positions
     for (i = 0; i < myObstacles.length; i += 1) {
         myObstacles[i].x += -1;
         myObstacles[i].update();
     }
 
-    // Control the game piece movement with arrow keys
     myGamePiece.speedX = 0;
     myGamePiece.speedY = 0;
     if (myGameArea.keys && myGameArea.keys[37]) { myGamePiece.speedX = -1; } // Left arrow
@@ -212,25 +194,20 @@ function updateGameArea() {
     if (myGameArea.keys && myGameArea.keys[38]) { myGamePiece.speedY = -1; } // Up arrow
     if (myGameArea.keys && myGameArea.keys[40]) { myGamePiece.speedY = 1; }  // Down arrow
 
-    // Update the game piece's position and render it
     myGamePiece.newPos();
     myGamePiece.update();
 
-   // Update and render the score after everything else
-myScore.text = "SCORE: " + myGameArea.frameNo; // Update score text
-myScore.update(); // Draw score
-
+    document.getElementById('scoreDisplay').textContent = "SCORE: " + myGameArea.frameNo;
 }
 
 function everyinterval(n) {
-    if ((myGameArea.frameNo / n) % 1 == 0) { return true; }
-    return false;
+    return (myGameArea.frameNo / n) % 1 === 0;
 }
 
 function playBackgroundMusic() {
     if (!backgroundMusic) {
         backgroundMusic = new Audio("Local Forecast - Elevator.mp3");
-        backgroundMusic.loop = true; // Loop the music
+        backgroundMusic.loop = true;
     }
     backgroundMusic.play();
 }
@@ -238,7 +215,7 @@ function playBackgroundMusic() {
 function stopBackgroundMusic() {
     if (backgroundMusic) {
         backgroundMusic.pause();
-        backgroundMusic.currentTime = 0; // Reset to the start of the track
+        backgroundMusic.currentTime = 0;
     }
 }
 
@@ -249,19 +226,23 @@ function pauseBackgroundMusic() {
 }
 
 function playExplosionEffect() {
-    // Play explosion sound
     if (explosionSound) {
         explosionSound.play();
     }
 
-    // Draw explosion image at the ship's position
     myGameArea.context.drawImage(explosionImage, myGamePiece.x - 25, myGamePiece.y - 25, 100, 100);
 }
 
 </script>
 
-<!-- Add Pause and Restart buttons -->
+<!-- Score Display -->
+<div id="scoreDisplay">SCORE: 0</div>
+
+<!-- Pause and Restart buttons -->
 <div style="text-align: left;">
     <button onclick="myGameArea.pause()">Pause/Resume</button>
     <button onclick="myGameArea.reset()">Restart</button>
 </div>
+
+</body>
+</html>
