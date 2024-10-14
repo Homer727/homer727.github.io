@@ -30,7 +30,7 @@ function startGame() {
     // Create background with looping image
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
     // Score positioned in the top-right (x: canvas width - offset)
-    myScore = new component("30px", "Consolas", "white", 280, 40, "text"); // Move to top-right corner
+    myScore = new component("30px", "Consolas", "white", 400, 40, "text"); // Move to top-right corner
     myObstacles = []; // Reset obstacles when the game starts
     loadExplosionResources(); // Load explosion resources
     myGameArea.start();
@@ -121,9 +121,9 @@ function component(width, height, type, x, y, src) {
         this.text = "";
         this.update = function() {
             ctx = myGameArea.context;
-            ctx.font = width + " " + height;
+            ctx.font = width + " " + height; // Set font size and font-family
             ctx.fillStyle = src; // src is the text color (white)
-            ctx.fillText(this.text, this.x, this.y);
+            ctx.fillText(this.text, this.x, this.y); // Draw the text at specified position
         };
     } else {
         this.update = function() {
@@ -218,7 +218,6 @@ function updateGameArea() {
     // Update and render the score after everything else
     myScore.text = "SCORE: " + myGameArea.frameNo;
     myScore.update();
-    console.log("Score updated:", myGameArea.frameNo); // Debugging score update
 }
 
 function everyinterval(n) {
