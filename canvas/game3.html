@@ -26,10 +26,11 @@ var explosionSound;
 
 function startGame() {
     // Create game piece with spaceship image
-    myGamePiece = new component(48, 48, "image", 10, 120, "Spaceship.png");
+    myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
     // Create background with looping image
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
-    myScore = new component("30px", "Consolas", "white", 280, 40, "text");
+    // Score positioned in the top-right (x: canvas width - offset)
+    myScore = new component("30px", "Consolas", "white", 380, 40, "text");
     myObstacles = []; // Reset obstacles when the game starts
     loadExplosionResources(); // Load explosion resources
     myGameArea.start();
@@ -121,7 +122,7 @@ function component(width, height, type, x, y, src) {
         this.update = function() {
             ctx = myGameArea.context;
             ctx.font = width + " " + height;
-            ctx.fillStyle = src;
+            ctx.fillStyle = src; // src is the text color (white)
             ctx.fillText(this.text, this.x, this.y);
         };
     } else {
@@ -244,15 +245,17 @@ function pauseBackgroundMusic() {
 function stopBackgroundMusic() {
     if (backgroundMusic) {
         backgroundMusic.pause();
-        backgroundMusic.currentTime = 0; // Reset to the beginning of the track
+        backgroundMusic.currentTime = 0; // Reset to the start of the track
     }
 }
 
-// Function to play explosion effect
+// Function to play explosion effect (sound and image)
 function playExplosionEffect() {
+    // Play explosion sound
     if (explosionSound) {
-        explosionSound.play(); // Play explosion sound
+        explosionSound.play();
     }
+
     // Draw explosion image in the center of the game area
     myGameArea.context.drawImage(explosionImage, myGamePiece.x - 25, myGamePiece.y - 25, 100, 100);
 }
