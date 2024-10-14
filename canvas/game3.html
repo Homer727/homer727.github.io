@@ -35,6 +35,7 @@ function startGame() {
     loadExplosionResources(); // Load explosion resources    
     playBackgroundMusic(); // Start music when the game starts
     myGameArea.start();
+    myScore.text = "SCORE: 0";
 }
 
 var myGameArea = {
@@ -215,7 +216,6 @@ function updateGameArea() {
     // Update and render the score after everything else
     myScore.text == "SCORE: " + myGameArea.frameNo;
     myScore.update();        
-    myScore.text = "SCORE: 0";
     
     // Update the game piece's position and render it
     myGamePiece.newPos();
