@@ -26,7 +26,7 @@ var gamePaused = false; // Variable to track if the game is paused
 function startGame() {
     myObstacles = []; // Reset obstacles array
     myGamePiece = new gameObject(50, 50, "Spaceship.png", 10, 120, "image");
-    myBackground = new gameObject(480, 270, "Background.jpeg", 0, 0, "background");
+    myBackground = new gameObject(280, 270, "Background.jpeg", 0, 0, "background");
     mySound = new sound("Explosion Sound Effect.mp3");
     myMusic = new sound("Local Forecast - Elevator.mp3");
 
@@ -34,7 +34,7 @@ function startGame() {
     myGameArea.frameNo = 0;
     myMusic.play();
 
-    myScore = new gameObject("30px", "Consolas", "white", 400, 40, "text");
+    myScore = new gameObject("30px", "Consolas", "white", 280, 40, "text");
     myScore.text = "SCORE: 0"; // Initialize score text
     myGameArea.start();
 }
