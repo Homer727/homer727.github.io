@@ -94,7 +94,10 @@ function component(width, height, type, x, y, src) {
     this.speedX = 0;
     this.speedY = 0;
 
-    if (type === "image" || type === "background") {
+    // Context defined here to avoid issues
+    const ctx = myGameArea.context;
+
+    if (type == "image" || type == "background") {
         this.image = new Image();
         this.image.src = src;
         this.image.onload = () => {
@@ -102,8 +105,7 @@ function component(width, height, type, x, y, src) {
         };
         this.update = function() {
             if (this.loaded) {
-                ctx = myGameArea.context;
-                if (type === "background") {
+                if (type == "background") {
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                     ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
                 } else {
@@ -111,17 +113,15 @@ function component(width, height, type, x, y, src) {
                 }
             }
         };
-    } else if (type === "text") {
+    } else if (type == "text") {
         this.text = "";
         this.update = function() {
-            ctx = myGameArea.context;
             ctx.font = width + " " + height;
             ctx.fillStyle = src; 
             ctx.fillText(this.text, this.x, this.y); 
         };
     } else {
         this.update = function() {
-            ctx = myGameArea.context;
             ctx.fillStyle = src;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         };
@@ -131,7 +131,7 @@ function component(width, height, type, x, y, src) {
         this.x += this.speedX;
         this.y += this.speedY;
 
-        if (type === "background") {
+        if (type == "background") {
             if (this.x <= -this.width) {
                 this.x = 0;
             }
