@@ -1,6 +1,3 @@
-<button onclick="myGameArea.pause()" id="Pause_Button">Pause Game/Resume Game</button>
-<button onclick="myGameArea.reset()" id="Restart_Button">Restart Game</button>
-
 var myGamePiece;
 var myObstacles = [];
 var myScore;
@@ -11,13 +8,19 @@ var explosionImage;
 var explosionSound;
 
 function startGame() {
+    // Create the game elements
     myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
     myObstacles = []; // Reset obstacles when the game starts
     loadExplosionResources(); // Load explosion resources
+
+    // Hide the Start button and show the Pause/Restart buttons
+    document.getElementById('Start_Button').style.display = 'none';
+    document.getElementById('Pause_Button').style.display = 'inline-block';
+    document.getElementById('Restart_Button').style.display = 'inline-block';
+
     myGameArea.start();
     playBackgroundMusic(); // Start music when the game starts
-
 }
 
 var myGameArea = {
@@ -26,10 +29,14 @@ var myGameArea = {
         this.canvas.width = 480;
         this.canvas.height = 270;
         this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[2]); // Insert before the buttons
+
+        // Insert canvas before the score display
+        var buttonDiv = document.getElementById('scoreDisplay').nextSibling;
+        document.body.insertBefore(this.canvas, buttonDiv);
+
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
-        
+
         window.addEventListener('keydown', function(e) {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = true;
