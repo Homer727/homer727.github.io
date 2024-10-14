@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<style>
-canvas {
-    border: 1px solid #d3d3d3;
-    background-color: #f1f1f1;
-}
-button {
-    margin: 5px;
-}
-</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        canvas {
+            border: 1px solid #d3d3d3;
+            background-color: #f1f1f1;
+        }
+        button {
+            margin: 5px;
+        }
+    </style>
 </head>
 <body onload="startGame()">
 <script>
@@ -21,14 +21,17 @@ var myScore;
 var background;
 var isPaused = false;
 var backgroundMusic;
+var explosionImage;
+var explosionSound;
 
 function startGame() {
     // Create game piece with spaceship image
     myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
     // Create background with looping image
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
-    myScore = new component("30px", "Consolas", "white", 280, 40, "text");
+    myScore = new component("30px", "Consolas", "black", 280, 40, "text");
     myObstacles = []; // Reset obstacles when the game starts
+    loadExplosionResources(); // Load explosion resources
     myGameArea.start();
     playBackgroundMusic(); // Start music when the game starts
 }
@@ -75,6 +78,15 @@ var myGameArea = {
         startGame(); // Restart the game
     }
 };
+
+function loadExplosionResources() {
+    // Load explosion image
+    explosionImage = new Image();
+    explosionImage.src = "Explosion.png";
+
+    // Load explosion sound
+    explosionSound = new Audio("Explosion Sound Effect.mp3");
+}
 
 function component(width, height, type, x, y, src) {
     this.type = type;
@@ -157,6 +169,7 @@ function updateGameArea() {
     // Check for crashes with obstacles
     for (i = 0; i < myObstacles.length; i += 1) {
         if (myGamePiece.crashWith(myObstacles[i])) {
+            playExplosionEffect(); // Play explosion effect
             myGameArea.stop();
             return;
         }
@@ -235,10 +248,19 @@ function stopBackgroundMusic() {
     }
 }
 
+// Function to play explosion effect
+function playExplosionEffect() {
+    if (explosionSound) {
+        explosionSound.play(); // Play explosion sound
+    }
+    // Draw explosion image in the center of the game area
+    myGameArea.context.drawImage(explosionImage, myGamePiece.x - 25, myGamePiece.y - 25, 100, 100);
+}
+
 </script>
 
 <!-- Add Pause and Restart buttons -->
-<div style="text-align: left;">
+<div style="text-align: center;">
     <button onclick="myGameArea.pause()">Pause/Resume</button>
     <button onclick="myGameArea.reset()">Restart</button>
 </div>
