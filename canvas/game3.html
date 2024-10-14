@@ -28,9 +28,9 @@ function startGame() {
     // Create game piece with spaceship image
     myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
     // Create background with looping image
+    myScore = new component("30px", "Consolas", "white", 280, 40, "text"); // Move to top-right corner
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
     // Score positioned in the top-right (x: canvas width - offset)
-    myScore = new component("30px", "Consolas", "white", 280, 40, "text"); // Move to top-right corner
     myObstacles = []; // Reset obstacles when the game starts
     loadExplosionResources(); // Load explosion resources    
     playBackgroundMusic(); // Start music when the game starts
