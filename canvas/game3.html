@@ -28,14 +28,13 @@ function startGame() {
     // Create game piece with spaceship image
     myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
     // Create background with looping image
-    myScore = new component("30px", "Consolas", "red", 280, 40, "text"); // Move to top-right corner
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
     // Score positioned in the top-right (x: canvas width - offset)
+    myScore = new component("30px", "Consolas", "white", 280, 40, "text"); // Move to top-right corner
     myObstacles = []; // Reset obstacles when the game starts
-    loadExplosionResources(); // Load explosion resources    
-    playBackgroundMusic(); // Start music when the game starts
+    loadExplosionResources(); // Load explosion resources
     myGameArea.start();
-    myScore.text = "SCORE: 0";
+    playBackgroundMusic(); // Start music when the game starts
 }
 
 var myGameArea = {
@@ -99,7 +98,7 @@ function component(width, height, type, x, y, src) {
     this.speedX = 0;
     this.speedY = 0;
 
-    if (type === "image" || type === "background" ) {
+    if (type === "image" || type === "background") {
         this.image = new Image();
         this.image.src = src;
         this.image.onload = () => {
@@ -116,21 +115,16 @@ function component(width, height, type, x, y, src) {
                     // Spaceship image
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 }
-            } 
-             this.update = function() {
-        ctx = myGameArea.context;
-        if (this.type == "text") {
-            ctx.font = this.width + " " + this.height;
-            ctx.fillStyle = color;
-            ctx.fillText(this.text, this.x, this.y);
-        } else {
-            ctx.fillStyle = color;
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-        }
-    }
             }
         };
-
+    } else if (type === "text") {
+        this.text = "";
+        this.update = function() {
+            ctx = myGameArea.context;
+            ctx.font = width + " " + height; // Set font size and font-family
+            ctx.fillStyle = src; // src is the text color (white)
+            ctx.fillText(this.text, this.x, this.y); // Draw the text at specified position
+        };
     } else {
         this.update = function() {
             ctx = myGameArea.context;
@@ -166,6 +160,7 @@ function component(width, height, type, x, y, src) {
         }
         return crash;
     };
+}
 
 function updateGameArea() {
     if (isPaused) return; // Don't update if the game is paused
@@ -195,7 +190,7 @@ function updateGameArea() {
         minHeight = 20;
         maxHeight = 200;
         height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
-        minGap = 60;
+        minGap = 50;
         maxGap = 200;
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
         myObstacles.push(new component(10, height, "red", x, 0));
@@ -216,14 +211,13 @@ function updateGameArea() {
     if (myGameArea.keys && myGameArea.keys[38]) { myGamePiece.speedY = -1; } // Up arrow
     if (myGameArea.keys && myGameArea.keys[40]) { myGamePiece.speedY = 1; }  // Down arrow
 
-    // Update and render the score after everything else
-    myScore.text = "SCORE: " + myGameArea.frameNo;
-    myScore.update();        
-    
     // Update the game piece's position and render it
     myGamePiece.newPos();
     myGamePiece.update();
 
+    // Update and render the score after everything else
+    myScore.text = "SCORE: " + myGameArea.frameNo;
+    myScore.update();
 }
 
 function everyinterval(n) {
