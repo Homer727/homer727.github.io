@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style>
@@ -25,16 +25,13 @@ var explosionImage;
 var explosionSound;
 
 function startGame() {
-    // Create game piece with spaceship image
     myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
-    // Create background with looping image
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
-    // Score positioned in the top-right (x: canvas width - offset)
-    myScore = new component("30px", "Consolas", "white", 280, 40, "text"); // Move to top-right corner
-    myObstacles = []; // Reset obstacles when the game starts
-    loadExplosionResources(); // Load explosion resources
+    myScore = new component("30px", "Consolas", "white", 380, 40, "text"); // Top-right corner
+    myObstacles = [];
+    loadExplosionResources();
     myGameArea.start();
-    playBackgroundMusic(); // Start music when the game starts
+    playBackgroundMusic();
 }
 
 var myGameArea = {
@@ -47,7 +44,7 @@ var myGameArea = {
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
         
-        // Add event listeners for keyboard input
+        // Event listeners for keyboard input
         window.addEventListener('keydown', function(e) {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = true;
@@ -61,31 +58,28 @@ var myGameArea = {
     },
     stop: function() {
         clearInterval(this.interval);
-        stopBackgroundMusic(); // Stop the music when the game stops
+        stopBackgroundMusic();
     },
     pause: function() {
         if (!isPaused) {
             clearInterval(this.interval);
-            pauseBackgroundMusic(); // Pause the music when the game is paused
+            pauseBackgroundMusic();
             isPaused = true;
         } else {
             this.interval = setInterval(updateGameArea, 20);
-            playBackgroundMusic(); // Resume music when game is unpaused
+            playBackgroundMusic();
             isPaused = false;
         }
     },
     reset: function() {
         this.stop();
-        startGame(); // Restart the game
+        startGame();
     }
 };
 
 function loadExplosionResources() {
-    // Load explosion image
     explosionImage = new Image();
     explosionImage.src = "Explosion.png";
-
-    // Load explosion sound
     explosionSound = new Audio("Explosion Sound Effect.mp3");
 }
 
@@ -108,11 +102,8 @@ function component(width, height, type, x, y, src) {
             if (this.loaded) {
                 ctx = myGameArea.context;
                 if (type === "background") {
-                    // Looping background logic
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                    ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
                 } else {
-                    // Spaceship image
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 }
             }
@@ -121,9 +112,9 @@ function component(width, height, type, x, y, src) {
         this.text = "";
         this.update = function() {
             ctx = myGameArea.context;
-            ctx.font = width + " " + height; // Set font size and font-family
-            ctx.fillStyle = src; // src is the text color (white)
-            ctx.fillText(this.text, this.x, this.y); // Draw the text at specified position
+            ctx.font = width + " " + height; // Set font
+            ctx.fillStyle = src; // Set text color
+            ctx.fillText(this.text, this.x, this.y); // Draw text
         };
     } else {
         this.update = function() {
@@ -136,13 +127,6 @@ function component(width, height, type, x, y, src) {
     this.newPos = function() {
         this.x += this.speedX;
         this.y += this.speedY;
-
-        if (type === "background") {
-            // Move background to the left to create scrolling effect
-            if (this.x <= -this.width) {
-                this.x = 0;
-            }
-        }
     };
 
     this.crashWith = function(otherobj) {
@@ -154,56 +138,50 @@ function component(width, height, type, x, y, src) {
         var otherright = otherobj.x + otherobj.width;
         var othertop = otherobj.y;
         var otherbottom = otherobj.y + otherobj.height;
-        var crash = true;
-        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
-            crash = false;
-        }
-        return crash;
+        return !(mybottom < othertop || mytop > otherbottom || myright < otherleft || myleft > otherright);
     };
 }
 
 function updateGameArea() {
-    if (isPaused) return; // Don't update if the game is paused
-
-    var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+    if (isPaused) return;
 
     // Check for crashes with obstacles
-    for (i = 0; i < myObstacles.length; i += 1) {
+    for (i = 0; i < myObstacles.length; i++) {
         if (myGamePiece.crashWith(myObstacles[i])) {
-            playExplosionEffect(); // Play explosion effect
+            playExplosionEffect();
             myGameArea.stop();
             return;
         }
     }
 
     myGameArea.clear();
-    myGameArea.frameNo += 1;
+    myGameArea.frameNo++;
 
-    // Update background and make it scroll
+    // Update background
     background.speedX = -1;
     background.newPos();
     background.update();
 
-    // Generate obstacles at regular intervals
+    // Generate obstacles
     if (myGameArea.frameNo == 1 || everyinterval(150)) {
-        x = myGameArea.canvas.width;
-        minHeight = 20;
-        maxHeight = 200;
-        height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
-        minGap = 50;
-        maxGap = 200;
-        gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+        var x = myGameArea.canvas.width;
+        var minHeight = 20;
+        var maxHeight = 200;
+        var height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+        var minGap = 50;
+        var maxGap = 200;
+        var gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
         myObstacles.push(new component(10, height, "red", x, 0));
         myObstacles.push(new component(10, x - height - gap, "red", x, height + gap));
     }
 
     // Update obstacle positions
-    for (i = 0; i < myObstacles.length; i += 1) {
+    for (i = 0; i < myObstacles.length; i++) {
         myObstacles[i].x += -1;
         myObstacles[i].update();
     }
 
-    // Control the game piece movement with arrow keys
+    // Control the game piece movement
     myGamePiece.speedX = 0;
     myGamePiece.speedY = 0;
     if (myGameArea.keys && myGameArea.keys[37]) { myGamePiece.speedX = -1; } // Left arrow
@@ -211,18 +189,16 @@ function updateGameArea() {
     if (myGameArea.keys && myGameArea.keys[38]) { myGamePiece.speedY = -1; } // Up arrow
     if (myGameArea.keys && myGameArea.keys[40]) { myGamePiece.speedY = 1; }  // Down arrow
 
-    // Update the game piece's position and render it
     myGamePiece.newPos();
     myGamePiece.update();
 
-    // Update and render the score after everything else
-    myScore.text = "SCORE: " + myGameArea.frameNo;
+    // Update and render the score
+    myScore.text = "SCORE: " + (myGameArea.frameNo - 1); // Decrement by 1 to start from 0
     myScore.update();
 }
 
 function everyinterval(n) {
-    if ((myGameArea.frameNo / n) % 1 == 0) { return true; }
-    return false;
+    return (myGameArea.frameNo / n) % 1 === 0;
 }
 
 function playBackgroundMusic() {
@@ -247,12 +223,9 @@ function pauseBackgroundMusic() {
 }
 
 function playExplosionEffect() {
-    // Play explosion sound
     if (explosionSound) {
         explosionSound.play();
     }
-
-    // Draw explosion image at the ship's position
     myGameArea.context.drawImage(explosionImage, myGamePiece.x - 25, myGamePiece.y - 25, 100, 100);
 }
 
