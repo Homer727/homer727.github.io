@@ -115,6 +115,14 @@ function component(width, height, type, x, y, src) {
                     // Spaceship image
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 }
+                } else if (type === "text") {
+            this.text = "";
+            this.update = function() {
+            ctx = myGameArea.context;
+            ctx.font = width + " " + height; // Set font size and font-family
+            ctx.fillStyle = src; // src is the text color (white)
+            ctx.fillText(this.text, this.x, this.y); // Draw the text at specified position
+        };
             }
         };
 
@@ -204,13 +212,13 @@ function updateGameArea() {
     if (myGameArea.keys && myGameArea.keys[38]) { myGamePiece.speedY = -1; } // Up arrow
     if (myGameArea.keys && myGameArea.keys[40]) { myGamePiece.speedY = 1; }  // Down arrow
 
+    // Update and render the score after everything else
+    myScore.text == "SCORE: " + myGameArea.frameNo;
+    myScore.update();
     // Update the game piece's position and render it
     myGamePiece.newPos();
     myGamePiece.update();
 
-    // Update and render the score after everything else
-    myScore.text == "SCORE: " + myGameArea.frameNo;
-    myScore.update();
 }
 
 function everyinterval(n) {
