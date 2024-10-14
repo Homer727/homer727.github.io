@@ -214,13 +214,14 @@ function updateGameArea() {
 
     // Update and render the score after everything else
     myScore.text == "SCORE: " + myGameArea.frameNo;
-    myScore.update();
+    myScore.update();        
+    myScore.text = "SCORE: 0";
+    
     // Update the game piece's position and render it
     myGamePiece.newPos();
     myGamePiece.update();
 
 }
-        myScore.text = "SCORE: 0"
 
 function everyinterval(n) {
     if ((myGameArea.frameNo / n) % 1 == 0) { return true; }
