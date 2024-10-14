@@ -99,7 +99,7 @@ function component(width, height, type, x, y, src) {
     this.speedX = 0;
     this.speedY = 0;
 
-    if (type === "image" || type === "background") {
+    if (type === "image" || type === "background" || type === "text") {
         this.image = new Image();
         this.image.src = src;
         this.image.onload = () => {
@@ -214,7 +214,7 @@ function updateGameArea() {
     if (myGameArea.keys && myGameArea.keys[40]) { myGamePiece.speedY = 1; }  // Down arrow
 
     // Update and render the score after everything else
-    myScore.text == "SCORE: " + myGameArea.frameNo;
+    myScore.text = "SCORE: " + myGameArea.frameNo;
     myScore.update();        
     
     // Update the game piece's position and render it
