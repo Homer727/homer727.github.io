@@ -1,3 +1,6 @@
+<button onclick="myGameArea.pause()" id="Pause_Button">Pause Game/Resume Game</button>
+<button onclick="myGameArea.reset()" id="Restart_Button">Restart Game</button>
+
 var myGamePiece;
 var myObstacles = [];
 var myScore;
@@ -15,8 +18,6 @@ function startGame() {
     myGameArea.start();
     playBackgroundMusic(); // Start music when the game starts
 
-    <button onclick="myGameArea.pause()" id="Pause_Button">Pause Game/Resume Game</button>
-    <button onclick="myGameArea.reset()" id="Restart_Button">Restart Game</button>
 }
 
 var myGameArea = {
