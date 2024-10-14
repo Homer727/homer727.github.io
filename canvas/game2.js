@@ -22,7 +22,7 @@ var myGameArea = {
         this.canvas.width = 480;
         this.canvas.height = 270;
         this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        document.body.insertBefore(this.canvas, document.body.childNodes[2]); // Insert before the buttons
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
         
@@ -209,17 +209,3 @@ function playExplosionEffect() {
 
     myGameArea.context.drawImage(explosionImage, myGamePiece.x - 25, myGamePiece.y - 25, 100, 100);
 }
-
-</script>
-
-<!-- Score Display -->
-<div id="scoreDisplay">SCORE: 0</div>
-
-<!-- Pause and Restart buttons -->
-<div style="text-align: left;">
-    <button onclick="myGameArea.pause()">Pause/Resume</button>
-    <button onclick="myGameArea.reset()">Restart</button>
-</div>
-
-</body>
-</html>
