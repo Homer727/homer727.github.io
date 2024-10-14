@@ -30,7 +30,7 @@ function startGame() {
     // Create background with looping image
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
     // Score positioned in the top-right (x: canvas width - offset)
-    myScore = new component("30px", "Consolas", "white", 280, 40, "text");
+    myScore = new component("30px", "Consolas", "white", 380, 40, "text");
     myObstacles = []; // Reset obstacles when the game starts
     loadExplosionResources(); // Load explosion resources
     myGameArea.start();
@@ -218,6 +218,7 @@ function updateGameArea() {
     // Update and render the score after everything else
     myScore.text = "SCORE: " + myGameArea.frameNo;
     myScore.update();
+    console.log("Score updated:", myGameArea.frameNo); // Debugging score update
 }
 
 function everyinterval(n) {
@@ -225,7 +226,6 @@ function everyinterval(n) {
     return false;
 }
 
-// Function to play background music
 function playBackgroundMusic() {
     if (!backgroundMusic) {
         backgroundMusic = new Audio("Local Forecast - Elevator.mp3");
@@ -234,14 +234,6 @@ function playBackgroundMusic() {
     backgroundMusic.play();
 }
 
-// Function to pause background music
-function pauseBackgroundMusic() {
-    if (backgroundMusic) {
-        backgroundMusic.pause();
-    }
-}
-
-// Function to stop background music
 function stopBackgroundMusic() {
     if (backgroundMusic) {
         backgroundMusic.pause();
@@ -249,21 +241,26 @@ function stopBackgroundMusic() {
     }
 }
 
-// Function to play explosion effect (sound and image)
+function pauseBackgroundMusic() {
+    if (backgroundMusic) {
+        backgroundMusic.pause();
+    }
+}
+
 function playExplosionEffect() {
     // Play explosion sound
     if (explosionSound) {
         explosionSound.play();
     }
 
-    // Draw explosion image in the center of the game area
+    // Draw explosion image at the ship's position
     myGameArea.context.drawImage(explosionImage, myGamePiece.x - 25, myGamePiece.y - 25, 100, 100);
 }
 
 </script>
 
 <!-- Add Pause and Restart buttons -->
-<div style="text-align: left;">
+<div style="text-align: center;">
     <button onclick="myGameArea.pause()">Pause/Resume</button>
     <button onclick="myGameArea.reset()">Restart</button>
 </div>
