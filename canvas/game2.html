@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<style>
-canvas {
-    border:1px solid #d3d3d3;
-}
-#Pause_Button
-{
-    display: none;
-}
-#Start_Button
-{
-    display: block;
-}
-#Restart_Button
-{
-    display: none;
-}
-</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        canvas {
+            border: 1px solid #d3d3d3;
+            background-color: #f1f1f1;
+        }
+        button {
+            margin: 5px;
+        }
+        #scoreDisplay {
+            font-family: Consolas;
+            font-size: 30px;
+            color: black;
+        }
+    </style>
 </head>
-<body>
+<body onload="startGame()">
 <script src="game2.js"></script>
 <br>
 
