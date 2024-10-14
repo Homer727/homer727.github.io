@@ -29,7 +29,7 @@ function startGame() {
     myGamePiece = new component(48, 48, "image", 10, 120, "Spaceship.png");
     // Create background with looping image
     background = new component(480, 270, "background", 0, 0, "Background.jpeg");
-    myScore = new component("30px", "Consolas", "black", 280, 40, "text");
+    myScore = new component("30px", "Consolas", "white", 280, 40, "text");
     myObstacles = []; // Reset obstacles when the game starts
     loadExplosionResources(); // Load explosion resources
     myGameArea.start();
