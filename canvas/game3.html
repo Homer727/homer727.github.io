@@ -16,27 +16,23 @@
 <script>
 
 var myGamePiece;
-var myBackground;
 var myObstacles = [];
 var myScore;
-var mySound;
-var myMusic;
-var gamePaused = false; // Variable to track if the game is paused
+var background;
+var isPaused = false;
+var backgroundMusic;
+var explosionImage;
+var explosionSound;
 
 function startGame() {
-    myObstacles = []; // Reset obstacles array
-    myGamePiece = new gameObject(50, 50, "Spaceship.png", 10, 120, "image");
-    myBackground = new gameObject(480, 270, "Background.jpeg", 0, 0, "background");
-    mySound = new sound("Explosion Sound Effect.mp3");
-    myMusic = new sound("Local Forecast - Elevator.mp3");
-
-    // Reset the frame count and play music
-    myGameArea.frameNo = 0;
-    myMusic.play();
-
-    myScore = new gameObject("30px", "Consolas", "white", 400, 40, "text");
+    myGamePiece = new component(50, 50, "image", 10, 120, "Spaceship.png");
+    background = new component(480, 270, "background", 0, 0, "Background.jpeg");
+   myScore = new gameObject("30px", "Consolas", "white", 400, 40, "text");
     myScore.text = "SCORE: 0"; // Initialize score text
+    myObstacles = []; 
+    loadExplosionResources();
     myGameArea.start();
+    playBackgroundMusic();
 }
 
 var myGameArea = {
@@ -47,8 +43,9 @@ var myGameArea = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, 20); // Game loop starts here
-
+        this.interval = setInterval(updateGameArea, 20);
+        
+        // Add event listeners for keyboard input
         window.addEventListener('keydown', function(e) {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = true;
@@ -61,72 +58,83 @@ var myGameArea = {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
     stop: function() {
-        clearInterval(this.interval); // Stops the game
-        myMusic.stop(); // Stop the music
+        clearInterval(this.interval);
+        stopBackgroundMusic();
     },
     pause: function() {
-        if (gamePaused) {
-            this.interval = setInterval(updateGameArea, 20); // Resume game
-            myMusic.play();
-            gamePaused = false;
+        if (!isPaused) {
+            clearInterval(this.interval);
+            pauseBackgroundMusic();
+            isPaused = true;
         } else {
-            clearInterval(this.interval); // Stop the game loop
-            myMusic.stop(); // Stop the music
-            gamePaused = true;
+            this.interval = setInterval(updateGameArea, 20);
+            playBackgroundMusic();
+            isPaused = false;
         }
     },
     reset: function() {
         this.stop();
-        startGame(); // Restart the game
+        startGame();
     }
 };
 
-function gameObject(width, height, src, x, y, type) {
+function loadExplosionResources() {
+    explosionImage = new Image();
+    explosionImage.src = "Explosion.png";
+
+    explosionSound = new Audio("Explosion Sound Effect.mp3");
+}
+
+function component(width, height, type, x, y, src) {
     this.type = type;
     this.width = width;
     this.height = height;
-    this.speedX = 0;
-    this.speedY = 0;
     this.x = x;
     this.y = y;
-    this.gravity = 0;
-    this.gravitySpeed = 0;
-    this.angle = 0;
+    this.speedX = 0;
+    this.speedY = 0;
 
-    if (type === "image" || type === "background" || type === "obstacle") {
+    if (type === "image" || type === "background") {
         this.image = new Image();
         this.image.src = src;
-    }
-
-    this.update = function() {
-        ctx = myGameArea.context;
-        if (this.type === "text") {
-            ctx.font = this.width + " " + this.height;
-            ctx.fillStyle = src; // color
-            ctx.fillText(this.text, this.x, this.y);
-        } else if (this.type === "image" || this.type === "background" || this.type === "obstacle") {
-            ctx.save(); // Save the current drawing state
-            ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-            ctx.rotate(this.angle);
-            ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
-            ctx.restore();
-        } else {
+        this.image.onload = () => {
+            this.loaded = true;
+        };
+        this.update = function() {
+            if (this.loaded) {
+                ctx = myGameArea.context;
+                if (type === "background") {
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                    ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
+                } else {
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                }
+            }
+        };
+    } else if (type === "text") {
+        this.text = "";
+        this.update = function() {
+            ctx = myGameArea.context;
+            ctx.font = width + " " + height;
+            ctx.fillStyle = src; 
+            ctx.fillText(this.text, this.x, this.y); 
+        };
+    } else {
+        this.update = function() {
+            ctx = myGameArea.context;
             ctx.fillStyle = src;
             ctx.fillRect(this.x, this.y, this.width, this.height);
-        }
-    };
+        };
+    }
 
     this.newPos = function() {
         this.x += this.speedX;
-        this.y += this.speedY + this.gravitySpeed;
-        this.hitBottom();
-    };
+        this.y += this.speedY;
 
-    this.hitBottom = function() {
-        var rockbottom = myGameArea.canvas.height - this.height;
-        if (this.y > rockbottom) {
-            this.y = rockbottom;
-            this.gravitySpeed = 0;
+        if (type === "background") {
+            if (this.x <= -this.width) {
+                this.x = 0;
+            }
         }
     };
 
@@ -144,30 +152,26 @@ function gameObject(width, height, src, x, y, type) {
 }
 
 function updateGameArea() {
-    if (gamePaused) return; // Don't update if the game is paused
+    if (isPaused) return;
 
     var x, height, gap, minHeight, maxHeight, minGap, maxGap;
-    myGameArea.clear();
-    myBackground.newPos();
-    myBackground.update();
-    myGameArea.frameNo += 1;
 
-    // Check for crashes with obstacles
     for (i = 0; i < myObstacles.length; i += 1) {
         if (myGamePiece.crashWith(myObstacles[i])) {
-            mySound.play();
-            myMusic.stop();
+            playExplosionEffect();
             myGameArea.stop();
             return;
         }
     }
 
-    // Update score
-    myScore.text = "SCORE: " + myGameArea.frameNo; // Update score text
-    myScore.update(); // Draw score
+    myGameArea.clear();
+    myGameArea.frameNo += 1;
 
-    // Generate obstacles at regular intervals
-    if (myGameArea.frameNo === 1 || everyinterval(150)) {
+    background.speedX = -1;
+    background.newPos();
+    background.update();
+
+    if (myGameArea.frameNo == 1 || everyinterval(150)) {
         x = myGameArea.canvas.width;
         minHeight = 20;
         maxHeight = 200;
@@ -175,57 +179,67 @@ function updateGameArea() {
         minGap = 50;
         maxGap = 200;
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-        myObstacles.push(new gameObject(10, height, "red", x, 0, "obstacle"));
-        myObstacles.push(new gameObject(10, x - height - gap, "red", x, height + gap, "obstacle"));
+        myObstacles.push(new component(10, height, "red", x, 0));
+        myObstacles.push(new component(10, x - height - gap, "red", x, height + gap));
     }
 
-    // Update obstacle positions
     for (i = 0; i < myObstacles.length; i += 1) {
-        myObstacles[i].x -= 1; // Move obstacles left
+        myObstacles[i].x += -1;
         myObstacles[i].update();
     }
 
-    // Control the game piece movement with arrow keys
     myGamePiece.speedX = 0;
     myGamePiece.speedY = 0;
     if (myGameArea.keys && myGameArea.keys[37]) { myGamePiece.speedX = -1; } // Left arrow
     if (myGameArea.keys && myGameArea.keys[39]) { myGamePiece.speedX = 1; }  // Right arrow
     if (myGameArea.keys && myGameArea.keys[38]) { myGamePiece.speedY = -1; } // Up arrow
     if (myGameArea.keys && myGameArea.keys[40]) { myGamePiece.speedY = 1; }  // Down arrow
+
     myGamePiece.newPos();
     myGamePiece.update();
+
+    myScore.text = "SCORE: " + myGameArea.frameNo; // Update score text
+    myScore.update(); // Draw score
 }
 
 function everyinterval(n) {
-    return (myGameArea.frameNo / n) % 1 === 0;
+    return (myGameArea.frameNo / n) % 1 === 0; // Improved condition
 }
 
-function sound(src) {
-    this.sound = document.createElement("audio");
-    this.sound.src = src;
-    this.sound.setAttribute("preload", "auto");
-    this.sound.setAttribute("controls", "none");
-    this.sound.style.display = "none";
-    document.body.appendChild(this.sound);
-
-    this.play = function() {
-        this.sound.play();
-    };
-
-    this.stop = function() {
-        this.sound.pause();
-        this.sound.currentTime = 0; // Reset to the beginning
-    };
+function playBackgroundMusic() {
+    if (!backgroundMusic) {
+        backgroundMusic = new Audio("Local Forecast - Elevator.mp3");
+        backgroundMusic.loop = true;
+    }
+    backgroundMusic.play();
 }
 
-// Add Pause and Restart buttons
-document.write(`
+function stopBackgroundMusic() {
+    if (backgroundMusic) {
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+    }
+}
+
+function pauseBackgroundMusic() {
+    if (backgroundMusic) {
+        backgroundMusic.pause();
+    }
+}
+
+function playExplosionEffect() {
+    if (explosionSound) {
+        explosionSound.play();
+    }
+    myGameArea.context.drawImage(explosionImage, myGamePiece.x - 25, myGamePiece.y - 25, 100, 100);
+}
+
+</script>
+
+<!-- Add Pause and Restart buttons -->
 <div style="text-align: left;">
     <button onclick="myGameArea.pause()">Pause/Resume</button>
     <button onclick="myGameArea.reset()">Restart</button>
 </div>
-`);
-
-</script>
 </body>
 </html>
