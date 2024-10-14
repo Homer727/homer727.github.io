@@ -119,11 +119,11 @@ function component(width, height, type, x, y, src) {
             }
         };
     } else if (type === "text") {
-        this.text = ""; // Initialize the text
+        this.text = "";
         this.update = function() {
             ctx = myGameArea.context;
             ctx.font = width + " " + height; // Set font size and font-family
-            ctx.fillStyle = src; // Set text color
+            ctx.fillStyle = src; // src is the text color (white)
             ctx.fillText(this.text, this.x, this.y); // Draw the text at specified position
         };
     } else {
@@ -133,9 +133,6 @@ function component(width, height, type, x, y, src) {
             ctx.fillRect(this.x, this.y, this.width, this.height);
         };
     }
-
-    // (rest of the component function remains the same)
-}
 
     this.newPos = function() {
         this.x += this.speedX;
@@ -219,7 +216,7 @@ function updateGameArea() {
     myGamePiece.newPos();
     myGamePiece.update();
 
-  // Update and render the score after everything else
+   // Update and render the score after everything else
 myScore.text = "SCORE: " + myGameArea.frameNo; // Update score text
 myScore.update(); // Draw score
 
@@ -268,6 +265,3 @@ function playExplosionEffect() {
     <button onclick="myGameArea.pause()">Pause/Resume</button>
     <button onclick="myGameArea.reset()">Restart</button>
 </div>
-
-</body>
-</html>
