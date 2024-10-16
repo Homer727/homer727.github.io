@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chessboard with Piece Images</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone@7.10.3/babel.min.js" crossorigin></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="react,stage-3">
+
+        // initial state of the board
+
+        const initialGameState = [
+            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+        ];
+        // load images for pieces
+        const pieceImages = {
+      'r': 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg',
+      'n': 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg',
+      'b': 'https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg',
+      'q': 'https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg',
+      'k': 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg',
+      'p': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg',
+      'R': 'https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg',
+      'N': 'https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg',
+      'B': 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg',
+      'Q': 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg',
+      'K': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg',
+      'P': 'https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg'
+    };
+
+        function Game() {
+            const [game, setGame] = React.useState(initialGameState); //state hook for current game board
+            const [selectedSquare, setSelectedSquare] = React.useState(null); // State hook for currently selected square
+            const [player, setPlayer] = React.useState("White");  //state hook for current turn
+            const [voice, setVoice] = React.useState(false);
+
+            // Handle changing current player
+            function changePlayer(isGameOver) {
+                if (!isGameOver) {
+                    if (player == "White") {
+                        setPlayer("Black");
+                    } else {
+                        setPlayer("White");
+                    }
+                } else { // activated when game ends
+                    setPlayer("Game Over! ".concat(player).concat(" wins!"));
+                }
+            }
+
+            function forfeit() { // code to make forfeit button work
+                setPlayer("Game Over! ".concat(player).concat(" loses!")); // calls end game condition on changePlayer
+            }
+
+            function restartGame() { // code to restart game
+                window.location.reload(); // refreshes page
+            }
+
+            function toggleVoice() { // switches voice on and off
+                let nextVoice = !voice;
+                setVoice(!voice);
+                if (nextVoice) {
+                    alert("Speech is on!");
+                } else {
+                    alert("Speech is off!");
+                }
+            }
+
+            function speak(row, col, piece) { // tells voice what to say
+                let sRow = row;
+                let sCol = col;
+                let sPiece = piece;
+                if (row == 0) { // translate row into proper number
+                    sRow = "8";
+                } else if (row == 1) {
+                    sRow = "7";
+                } else if (row == 2) {
+                    sRow = "6";
+                } else if (row == 3) {
+                    sRow = "5";
+                } else if (row == 4) {
+                    sRow = "4";
+                } else if (row == 5) {
+                    sRow = "3";
+                } else if (row == 6) {
+                    sRow = "2";
+                } else if (row == 7) {
+                    sRow = "1";
+                }
+
+                if (col == 0) { // translate column into a letter
+                    sCol = "A";
+                } else if (col == 1) {
+                    sCol = "B";
+                } else if (col == 2) {
+                    sCol = "C";
+                } else if (col == 3) {
+                    sCol = "D";
+                } else if (col == 4) {
+                    sCol = "E";
+                } else if (col == 5) {
+                    sCol = "F";
+                } else if (col == 6) {
+                    sCol = "G";
+                } else if (col == 7) {
+                    sCol = "H";
+                }
+
+                if (piece.toLowerCase() == 'p') { // Turn piece into a string
+                    sPiece = "Pawn";
+                } else if (piece.toLowerCase() == 'b') {
+                    sPiece = "Bishop";
+                } else if (piece.toLowerCase() == 'r') {
+                    sPiece = "Rook";
+                } else if (piece.toLowerCase() == 'n') {
+                    sPiece = "Knight";
+                } else if (piece.toLowerCase() == 'q') {
+                    sPiece = "Queen";
+                } else if (piece.toLowerCase() == 'k') {
+                    sPiece = "King";
+                }
+                const phrase = player.concat(sPiece, " to ", sCol, " ", sRow);
+                // Create a SpeechSynthesisUtterance
+                const utterance = new SpeechSynthesisUtterance(phrase);
+
+                // Select a voice
+                const voices = speechSynthesis.getVoices();
+                utterance.voice = voices[2]; // Choose a specific voice
+
+                // Speak the text
+                speechSynthesis.speak(utterance);
+            }
+
+            function proposeMove(currentMap, destRow, destCol, selectRow, selectCol, selectedPiece) {  
+                if (selectedPiece == 'r') { // check if rook is blocked
+                    if (!isBlockedVert(currentMap, Math.max(destRow, selectRow), Math.min(destRow, selectRow), selectCol) && !isBlockedHoriz(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), selectRow)) {
+                        makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                    }
+                } else if (selectedPiece == 'b') { // check if bishop is blocked
+                    if (((selectRow - destRow) / (selectCol - destCol)) < 0) {
+                        if (!isBlockedUpRight(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), Math.max(destRow, selectRow))) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    } else if (((selectRow - destRow) / (selectCol - destCol)) > 0) {
+                        if (!isBlockedDownRight(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), Math.min(destRow, selectRow))) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    }
+                } else if (selectedPiece == 'q') { // check if queen is blocked
+                    if (selectRow == destRow || selectCol == destCol) {
+                        if (!isBlockedVert(currentMap, Math.max(destRow, selectRow), Math.min(destRow, selectRow), selectCol) && !isBlockedHoriz(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), selectRow) ) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    } else if (((selectRow - destRow) / (selectCol - destCol)) < 0) {
+                        if (!isBlockedUpRight(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), Math.max(destRow, selectRow))) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    } else if (((selectRow - destRow) / (selectCol - destCol)) > 0) {
+                        if (!isBlockedDownRight(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), Math.min(destRow, selectRow))) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    }
+                } else { //check for every other piece
+                    makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                }
+            }
+
+            function makeMove(currentMap, destRow, destCol, selectRow, selectCol) {
+                let isGameOver = false;
+                let map = currentMap.slice(); // copy array
+                map[destRow][destCol] = map[selectRow][selectCol];
+                map[selectRow][selectCol] = '';
+                setGame(map); // update board
+                if (voice) {
+                    speak(destRow, destCol, map[destRow][destCol]); // say move
+                }
+                if (map[destRow][destCol] == 'K' || map[destRow][destCol] == 'k') { // check for end game condition
+                    isGameOver = true;
+                }
+                changePlayer(isGameOver); // update player
+            }
+
+            function isBlockedVert(currentMap, largerRow, smallerRow, selectCol) { //check if vertical movement is blocked
+                for (let i = smallerRow + 1; i < largerRow; i++) {
+                    if (currentMap[i][selectCol] != '') {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function isBlockedHoriz(currentMap, largerCol, smallerCol, selectRow) { //check if horizontal movement is blocked
+                for (let i = smallerCol + 1; i < largerCol; i++) {
+                    if (currentMap[selectRow][i] != '') {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function isBlockedUpRight(currentMap, largerCol, smallerCol, largerRow) { //check if diagonal movement (up-right) is blocked
+                for (let i = smallerCol + 1; i < largerCol; i++) {
+                    if (currentMap[largerRow - i + smallerCol][i] != '') {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function isBlockedDownRight(currentMap, largerCol, smallerCol, smallerRow) { //check if diagonal movement (down-right) is blocked
+                for (let i = smallerCol + 1; i < largerCol; i++) {
+                    if (currentMap[i - smallerCol + smallerRow][i] != '') {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // Handle square click
+            function handleClick(row, col) {
+                if (!selectedSquare) {
+                    if ((player == "White" && game[row][col] != game[row][col].toLowerCase() && game[row][col] != "") || (player == "Black" && game[row][col] == game[row][col].toLowerCase())) {
+                        setSelectedSquare([row, col]); //set selected square if valid square selected
+                    }
+                } else {
+                    const [selectedRow, selectedCol] = selectedSquare;
+                    proposeMove(game, row, col, selectedRow, selectedCol, game[selectedRow][selectedCol].toLowerCase()); 
+                    setSelectedSquare(null); //after valid move reset selected square to null
+                }
+            }
+
+            return (
+                <div>
+                    <h2>Chess Game</h2>
+                    <h3>Current Player: {player}</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)', gap: '2px', margin: '20px 0' }}>
+                        {game.map((row, rowIndex) => (
+                            row.map((piece, colIndex) => (
+                                <Square
+                                    key={`${rowIndex}-${colIndex}`}
+                                    value={piece}
+                                    onClick={() => handleClick(rowIndex, colIndex)}
+                                    isLight={(rowIndex + colIndex) % 2 === 0}
+                                    isSelected={selectedSquare && selectedSquare[0] === rowIndex && selectedSquare[1] === colIndex}
+                                />
+                            ))
+                        ))}
+                    </div>
+                    <button onClick={toggleVoice}>Toggle Voice</button>
+                    <button onClick={forfeit}>Forfeit</button>
+                    <button onClick={restartGame}>Restart Game</button>
+                </div>
+            );
+        }
+
+        // Define the Square component
+        function Square({ value, onClick, isLight, isSelected }) {
+            const pieceImage = value ? pieceImages[value] : null;
+            return (
+                <div
+                    onClick={onClick}
+                    style={{
+                        width: '60px',
+                        height: '60px',
+                        backgroundColor: isSelected ? 'yellow' : isLight ? '#f0d9b5' : '#b58863',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '1px solid #333',
+                        cursor: 'pointer'
+                    }}
+                >
+                    {pieceImage && <img src={pieceImage} alt={value} style={{ width: '50px', height: '50px' }} />}
+                </div>
+            );
+        }
+
+        // Render the Game component into the root div
+        ReactDOM.render(<Game />, document.getElementById('root'));
+
+    </script>
+</body>
+</html>
