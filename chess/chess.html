@@ -1,1 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chessboard with Piece Images</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone@7.10.3/babel.min.js" crossorigin></script>
+</head>
+<body>
+    <div id="root"></div>
 
+    <script type="text/babel" data-presets="react,stage-3">
+
+        // initial state of the board
+
+        const initialGameState = [
+            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+        ];
+        // load images for pieces
+        const pieceImages = {
+            'r': './imageassets/rookpink.svg',
+            'n': './imageassets/knightpink.svg',
+            'b': './imageassets/bishoppink.svg',
+            'q': './imageassets/queenpink.svg',
+            'k': './imageassets/kingpink.svg',
+            'p': './imageassets/pawnpink.svg',
+            'R': './imageassets/rookblue.svg',
+            'N': './imageassets/knightblue.svg',
+            'B': './imageassets/bishopblue.svg',
+            'Q': './imageassets/queenblue.svg',
+            'K': './imageassets/kingblue.svg',
+            'P': './imageassets/pawnblue.svg'
+        }
+
+        function Game() {
+            const [game, setGame] = React.useState(initialGameState); //state hook for current game board
+            const [selectedSquare, setSelectedSquare] = React.useState(null); // State hook for currently selected square
+            const [player, setPlayer] = React.useState("Blue");  //state hook for current turn
+            const [voice, setVoice] = React.useState(false);
+
+            // Handle changing current player
+            function changePlayer(isGameOver) {
+                if (!isGameOver) {
+                    if (player == "Blue") {
+                        setPlayer("Pink");
+                    } else {
+                        setPlayer("Blue");
+                    }
+                } else { // activated when game ends
+                    setPlayer("Game Over! ".concat(player).concat(" wins!"));
+                }
+            }
+
+            function forfeit() { // code to make forfeit button work
+                setPlayer("Game Over! ".concat(player).concat(" loses!")); // calls end game condition on changePlayer
+            }
+
+            function restartGame() { // code to restart game
+                window.location.reload(); // refreshes page
+            }
+
+            function toggleVoice() { // switches voice on and off
+                let nextVoice = !voice;
+                setVoice(!voice);
+                if (nextVoice) {
+                    alert("Speech is on!");
+                } else {
+                    alert("Speech is off!");
+                }
+            }
+
+            function speak(row, col, piece) { // tells voice what to say
+                let sRow = row;
+                let sCol = col;
+                let sPiece = piece;
+                if (row == 0) { // translate row into proper number
+                    sRow = "8";
+                } else if (row == 1) {
+                    sRow = "7";
+                } else if (row == 2) {
+                    sRow = "6";
+                } else if (row == 3) {
+                    sRow = "5";
+                } else if (row == 4) {
+                    sRow = "4";
+                } else if (row == 5) {
+                    sRow = "3";
+                } else if (row == 6) {
+                    sRow = "2";
+                } else if (row == 7) {
+                    sRow = "1";
+                }
+
+                if (col == 0) { // translate column into a letter
+                    sCol = "A";
+                } else if (col == 1) {
+                    sCol = "B";
+                } else if (col == 2) {
+                    sCol = "C";
+                } else if (col == 3) {
+                    sCol = "D";
+                } else if (col == 4) {
+                    sCol = "E";
+                } else if (col == 5) {
+                    sCol = "F";
+                } else if (col == 6) {
+                    sCol = "G";
+                } else if (col == 7) {
+                    sCol = "H";
+                }
+
+                if (piece.toLowerCase() == 'p') { // Turn piece into a string
+                    sPiece = "Pawn";
+                } else if (piece.toLowerCase() == 'b') {
+                    sPiece = "Bishop";
+                } else if (piece.toLowerCase() == 'r') {
+                    sPiece = "Rook";
+                } else if (piece.toLowerCase() == 'n') {
+                    sPiece = "Knight";
+                } else if (piece.toLowerCase() == 'q') {
+                    sPiece = "Queen";
+                } else if (piece.toLowerCase() == 'k') {
+                    sPiece = "King";
+                }
+                const phrase = player.concat(sPiece, " to ", sCol, " ", sRow);
+                // Create a SpeechSynthesisUtterance
+                const utterance = new SpeechSynthesisUtterance(phrase);
+
+                // Select a voice
+                const voices = speechSynthesis.getVoices();
+                utterance.voice = voices[2]; // Choose a specific voice
+
+                // Speak the text
+                speechSynthesis.speak(utterance);
+            }
+
+            function proposeMove(currentMap, destRow, destCol, selectRow, selectCol, selectedPiece) {  // Function to see if move is not blocked and won't put player in check.
+                if (selectedPiece == 'r') { // check if rook is blocked
+                    if (!isBlockedVert(currentMap, Math.max(destRow, selectRow), Math.min(destRow, selectRow), selectCol) && !isBlockedHoriz(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), selectRow)) {
+                        makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                    }
+                } else if (selectedPiece == 'b') { // check if bishop is blocked
+                    if (((selectRow - destRow) / (selectCol - destCol)) < 0) {
+                        if (!isBlockedUpRight(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), Math.max(destRow, selectRow))) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    } else if (((selectRow - destRow) / (selectCol - destCol)) > 0) {
+                        if (!isBlockedDownRight(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), Math.min(destRow, selectRow))) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    }
+                } else if (selectedPiece == 'q') { // check if queen is blocked
+                    if (selectRow == destRow || selectCol == destCol) {
+                        if (!isBlockedVert(currentMap, Math.max(destRow, selectRow), Math.min(destRow, selectRow), selectCol) && !isBlockedHoriz(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), selectRow) ) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    } else if (((selectRow - destRow) / (selectCol - destCol)) < 0) {
+                        if (!isBlockedUpRight(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), Math.max(destRow, selectRow))) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    } else if (((selectRow - destRow) / (selectCol - destCol)) > 0) {
+                        if (!isBlockedDownRight(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), Math.min(destRow, selectRow))) {
+                            makeMove(currentMap, destRow, destCol, selectRow, selectCol);
+                        }
+                    }
+                } else {
+                    makeMove(currentMap, destRow, destCol, selectRow, selectCol); // Only need to check rook, bishop, and queen.  King, pawn, knight have built in block checking logic.
+                }
+            }
+
+            function makeMove(currentMap, destRow, destCol, selectRow, selectCol) { // Actually make the move
+                if (currentMap[destRow][destCol].toLowerCase() == 'k') { // check if king is taken
+                    currentMap[destRow][destCol] = currentMap[selectRow][selectCol]; // Move the piece to the new location
+                    currentMap[selectRow][selectCol] = ''; // This line sets the old space to blank
+                    setGame(currentMap); // Update function for hook, feeds the new board image
+                    if (voice) {
+                        speak(destRow, destCol, currentMap[destRow][destCol]);
+                    }
+                    setSelectedSquare(null); // Update function for selectedsquare hook
+                    changePlayer(true); // activates game over state
+                } else {
+                    currentMap[destRow][destCol] = currentMap[selectRow][selectCol]; // Move the piece to the new location
+                    currentMap[selectRow][selectCol] = ''; // This line sets the old space to blank
+                    setGame(currentMap); // Update function for hook, feeds the new board image
+                    if (voice) {
+                        speak(destRow, destCol, currentMap[destRow][destCol]);
+                    }
+                    setSelectedSquare(null); // Update function for selectedsquare hook
+                    changePlayer(false);  // Player's turn has been changed
+                }
+            }
+
+            function isBlockedVert(map, highRow, lowRow, column) { // Check if movement is blocked vertically
+                let isBlocked = false;
+                for (i = lowRow+1; i < highRow; i++) {
+                    if (map[i][column]) {
+                        isBlocked = true;
+                    }
+                }
+                return isBlocked;
+            }
+
+            function isBlockedHoriz(map, highCol, lowCol, row) { // Check if movement is blocked horizontally
+                let isBlocked = false;
+                for (i = lowCol + 1; i < highCol; i++) {
+                    if (map[row][i]) {
+                        isBlocked = true;
+                    }
+                }
+                return isBlocked;
+            }
+
+            function isBlockedUpRight(map, highCol, lowCol, highRow) { // check if movement is blocked in up-right or down-left direction
+                let isBlocked = false;
+                for (i = lowCol + 1; i < highCol; i++) {
+                    if (map[highRow - i + lowCol][i]) {
+                        isBlocked = true;
+                    }
+                }
+                return isBlocked;
+            }
+
+            function isBlockedDownRight(map, highCol, lowCol, lowRow) { // check if movement is blocked in down-right or up-left direction
+                let isBlocked = false;
+                for (i = lowCol + 1; i < highCol; i++) {
+                    if (map[lowRow + i - lowCol][i]) {
+                        isBlocked = true;
+                    }
+                }
+                return isBlocked;
+            }
+
+            function handleClick(row, col) { // called when a square on the board is clicked
+                if (selectedSquare) {      // This branch runs if a square has already been selected
+                    const newGame = game.map(row => row.slice()); // Copies current game state into a new board
+                    const [selectedRow, selectedCol] = selectedSquare; // Creates constants for currently selected location
+                    const currentPiece = newGame[selectedRow][selectedCol]; // Constant for which piece is currently being moved
+                    if (!newGame[row][col] || (newGame[row][col] && !((newGame[row][col].toLowerCase() == newGame[row][col] && player == "Pink") || (newGame[row][col].toLowerCase() != newGame[row][col] && player == "Blue")))) { // Logic to ensure you are not trying to capture your own piece
+                        if (currentPiece.toLowerCase() == 'n') {
+                            if (((row == selectedRow + 1 || row == selectedRow - 1) && (col == selectedCol + 2 || col == selectedCol - 2)) || ((row == selectedRow + 2 || row == selectedRow - 2) && (col == selectedCol + 1 || col == selectedCol - 1))) {
+                                proposeMove(newGame, row, col, selectedRow, selectedCol, currentPiece.toLowerCase()); // Logic for knight movement
+                            }
+                        } else if (currentPiece.toLowerCase() == 'r') {
+                            if ((row == selectedRow && col != selectedCol) || (col == selectedCol && row != selectedRow)) {
+                                proposeMove(newGame, row, col, selectedRow, selectedCol, currentPiece.toLowerCase()); // Logic for rook movement
+                            }
+                        } else if (currentPiece.toLowerCase() == 'k') {
+                            if (((row == selectedRow + 1 || row == selectedRow - 1) && (col == selectedCol || col == selectedCol + 1 || col == selectedCol - 1)) || (row == selectedRow && (col == selectedCol + 1 || col == selectedCol - 1))) {
+                                proposeMove(newGame, row, col, selectedRow, selectedCol, currentPiece.toLowerCase()); // Logic for king movement
+                            }
+                        } else if (currentPiece.toLowerCase() == 'b') {
+                            if (((row - selectedRow) == (col - selectedCol)) || ((row - selectedRow) == -(col - selectedCol))) {
+                                proposeMove(newGame, row, col, selectedRow, selectedCol, currentPiece.toLowerCase()); // Logic for bishop movement
+                            }
+                        } else if (currentPiece.toLowerCase() == 'q') {
+                            if ((row == selectedRow && col != selectedCol) || (col == selectedCol && row != selectedRow) || ((row - selectedRow) == (col - selectedCol)) || ((row - selectedRow) == -(col - selectedCol))) {
+                                proposeMove(newGame, row, col, selectedRow, selectedCol, currentPiece.toLowerCase()); // Logic for queen movement
+                            }
+                        } else if (currentPiece == 'P') {
+                            if ((col == selectedCol && (row == selectedRow - 1 || (row == selectedRow - 2 && selectedRow == 6 && !newGame[5][col])) && !(newGame[row][col] && newGame[row][col].toLowerCase() == newGame[row][col])) || (row == selectedRow - 1 && (col == selectedCol - 1 || col == selectedCol + 1) && (newGame[row][col] && newGame[row][col].toLowerCase() == newGame[row][col]))) {
+                                proposeMove(newGame, row, col, selectedRow, selectedCol, currentPiece.toLowerCase()); // Logic for blue pawn movement
+                            }
+                        } else if (currentPiece == 'p') {
+                            if ((col == selectedCol && (row == selectedRow + 1 || (row == selectedRow + 2 && selectedRow == 1 && !newGame[2][col])) && !(newGame[row][col] && newGame[row][col].toLowerCase() != newGame[row][col])) || (row == selectedRow + 1 && (col == selectedCol - 1 || col == selectedCol + 1) && (newGame[row][col] && newGame[row][col].toLowerCase() != newGame[row][col]))) {
+                                proposeMove(newGame, row, col, selectedRow, selectedCol, currentPiece.toLowerCase()); // Logic for pink pawn movement
+                            }
+                        }
+                        //makeMove(newGame, row, col, selectedRow, selectedCol);
+                    } else if (row == selectedRow && col == selectedCol) { // Allows you to deselect your currently selected piece without ending your turn
+                        setSelectedSquare(null);
+                    }
+
+
+                } else {
+                    // This branch runs if no square is currently selected
+                    if (game[row][col] && ((game[row][col].toLowerCase() == game[row][col] && player == "Pink") || (game[row][col].toLowerCase() != game[row][col] && player == "Blue"))) {
+                        setSelectedSquare([row, col]); // Updates selected state.  Adds logic to ensure current player can only select their own color.
+                    }
+                }
+            }
+
+            return ( //returns the board and functional game
+                <div>
+                    <h1>Current player: {player}</h1>
+                    <button type="button" onClick={toggleVoice}>
+                        Toggle Voice
+                    </button>
+                    <button type="button" onClick={forfeit}>Forfeit</button>
+                    <button type="button" onClick={restartGame}>Restart Game</button>
+                    <Board game={game} onSquareClick={handleClick} selectedSquare={selectedSquare} />
+                </div>
+            );
+        }
+
+        // View: Board and buttons reflecting the game state
+        function Board({ game, onSquareClick, selectedSquare }) {
+            return (
+                <div>
+                    {game.map((row, rowIndex) => ( // adds row index to each row
+                        <div key={rowIndex} style={{ display: 'flex' }}>
+                            {row.map((value, colIndex) => ( //adds column index
+                                <Square // creates a new square
+                                    key={colIndex}
+                                    value={value}
+                                    onClick={() => onSquareClick(rowIndex, colIndex)}
+                                    isLight={(rowIndex + colIndex) % 2 === 0}
+                                    isSelected={selectedSquare && selectedSquare[0] === rowIndex && selectedSquare[1] === colIndex}
+                                />
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function Square({ value, onClick, isLight, isSelected }) {
+            const squareStyle = { //defines the style of a square
+                width: '80px',
+                height: '80px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                cursor: 'pointer',
+                backgroundColor: isSelected ? '#FF00C1' : (isLight ? '#8B6DB0' : '#7852A1'), //chooses between dark and light square
+                border: '1px solid #999'
+            };
+
+            // Display the piece image or an empty square
+            const pieceDisplay = () => {
+                if (value) {
+                    return <img src={pieceImages[value]} alt={value} style={{ width: '70px', height: '70px' }} />;
+                }
+                return null;
+            };
+
+            return ( // returns the completed square
+                <button style={squareStyle} onClick={onClick}>
+                    {pieceDisplay()}
+                </button>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById("root")); //sets the react root
+        root.render(<Game />); // renders the entire game
+    </script>
+</body>
+</html>
