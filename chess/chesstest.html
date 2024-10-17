@@ -100,54 +100,47 @@
             function canMove(piece, srcRow, srcCol, destRow, destCol) {
                 const rowDiff = Math.abs(destRow - srcRow);
                 const colDiff = Math.abs(destCol - srcCol);
-                const targetPiece = game[destRow][destCol];
-
-                // Check if the destination square is occupied by the player's own piece
-                if ((piece === piece.toUpperCase() && targetPiece === targetPiece?.toUpperCase()) ||
-                    (piece === piece.toLowerCase() && targetPiece === targetPiece?.toLowerCase())) {
-                    return false; // Cannot capture own piece
-                }
 
                 switch (piece.toLowerCase()) {
                     case 'p':
                         if (piece === 'P') {
                             if (srcRow === 6 && destRow === 4 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Double move from starting position
+                                return true;
                             } else if (destRow === srcRow - 1 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Single move forward
-                            } else if (destRow === srcRow - 1 && Math.abs(destCol - srcCol) === 1 && targetPiece && targetPiece === targetPiece.toLowerCase()) {
-                                return true; // Capture diagonally
+                                return true;
+                            } else if (destRow === srcRow - 1 && Math.abs(destCol - srcCol) === 1 && game[destRow][destCol] && game[destRow][destCol] === game[destRow][destCol].toLowerCase()) {
+                                return true;
                             }
                         } else {
                             if (srcRow === 1 && destRow === 3 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Double move from starting position
+                                return true;
                             } else if (destRow === srcRow + 1 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Single move forward
-                            } else if (destRow === srcRow + 1 && Math.abs(destCol - srcCol) === 1 && targetPiece && targetPiece === targetPiece.toUpperCase()) {
-                                return true; // Capture diagonally
+                                return true;
+                            } else if (destRow === srcRow + 1 && Math.abs(destCol - srcCol) === 1 && game[destRow][destCol] && game[destRow][destCol] === game[destRow][destCol].toUpperCase()) {
+                                return true;
                             }
                         }
-                        return false; // Invalid pawn move
+                        return false;
                     case 'r':
-                        return srcRow === destRow || srcCol === destCol; // Rook moves
+                        return srcRow === destRow || srcCol === destCol;
                     case 'n':
-                        return rowDiff * colDiff === 2; // Knight moves
+                        return rowDiff * colDiff === 2;
                     case 'b':
-                        return rowDiff === colDiff; // Bishop moves
+                        return rowDiff === colDiff;
                     case 'q':
-                        return srcRow === destRow || srcCol === destCol || rowDiff === colDiff; // Queen moves
+                        return srcRow === destRow || srcCol === destCol || rowDiff === colDiff;
                     case 'k':
-                        return rowDiff <= 1 && colDiff <= 1; // King moves
+                        return rowDiff <= 1 && colDiff <= 1;
                     default:
-                        return false; // Invalid piece
+                        return false;
                 }
             }
 
             function checkPromotion(map, row, col) {
                 if (map[row][col] === 'P' && row === 0) {
-                    map[row][col] = 'Q'; // Promote to Queen
+                    map[row][col] = 'Q';
                 } else if (map[row][col] === 'p' && row === 7) {
-                    map[row][col] = 'q'; // Promote to Queen
+                    map[row][col] = 'q';
                 }
             }
 
@@ -169,31 +162,22 @@
             }
 
             function handleClick(row, col) {
-    if (isGameOver) return;
+                if (isGameOver) return;
 
-    if (!selectedSquare) {
-        if ((player === "White" && game[row][col] && game[row][col] === game[row][col].toUpperCase()) ||
-            (player === "Black" && game[row][col] && game[row][col] === game[row][col].toLowerCase())) {
-            setSelectedSquare([row, col]); // Select the piece
-        }
-    } else {
-        const [selectedRow, selectedCol] = selectedSquare;
-        const selectedPiece = game[selectedRow][selectedCol];
-
-        // If the same piece is clicked again, do nothing (keep it selected)
-        if (row === selectedRow && col === selectedCol) {
-            return; // Do not deselect
-        }
-
-        // If a different square is clicked, check if the move is valid
-        if (canMove(selectedPiece, selectedRow, selectedCol, row, col)) {
-            makeMove(game, row, col, selectedRow, selectedCol);
-        }
-
-        // Deselect the square after attempting to move
-        setSelectedSquare(null);
-    }
-}
+                if (!selectedSquare) {
+                    if ((player === "White" && game[row][col] && game[row][col] === game[row][col].toUpperCase()) ||
+                        (player === "Black" && game[row][col] && game[row][col] === game[row][col].toLowerCase())) {
+                        setSelectedSquare([row, col]);
+                    }
+                } else {
+                    const [selectedRow, selectedCol] = selectedSquare;
+                    const selectedPiece = game[selectedRow][selectedCol];
+                    if (canMove(selectedPiece, selectedRow, selectedCol, row, col)) {
+                        makeMove(game, row, col, selectedRow, selectedCol);
+                    }
+                    setSelectedSquare(null);
+                }
+            }
 
             function toggleMute() {
                 if (audioRef.current) {
