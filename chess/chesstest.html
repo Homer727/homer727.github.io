@@ -46,18 +46,16 @@
             const [game, setGame] = React.useState(initialGameState); // state hook for current game board
             const [selectedSquare, setSelectedSquare] = React.useState(null); // state hook for currently selected square
             const [player, setPlayer] = React.useState("White");  // state hook for current turn
+            const [isGameOver, setIsGameOver] = React.useState(false); // track game-over state
 
             // Handle changing current player
-            function changePlayer(isGameOver) {
-                if (!isGameOver) {
-                    setPlayer(player === "White" ? "Black" : "White");
-                } else {
-                    setPlayer("Game Over! ".concat(player).concat(" wins!"));
-                }
+            function changePlayer() {
+                setPlayer(player === "White" ? "Black" : "White");
             }
 
             function forfeit() { // code to make forfeit button work
-                setPlayer("Game Over! ".concat(player).concat(" loses!")); // calls end game condition on changePlayer
+                setPlayer("Game Over! ".concat(player).concat(" loses!"));
+                setIsGameOver(true);
             }
 
             function restartGame() { // code to restart game
@@ -104,20 +102,27 @@
                 }
             }
 
+            // Handle movement and check for king capture
             function makeMove(currentMap, destRow, destCol, selectRow, selectCol) {
-                let isGameOver = false;
                 let map = currentMap.slice(); // copy array
-                map[destRow][destCol] = map[selectRow][selectCol];
-                map[selectRow][selectCol] = '';
-                setGame(map); // update board
-                if (map[destRow][destCol].toLowerCase() === 'k') { // check for end game condition
-                    isGameOver = true;
+                const targetPiece = map[destRow][destCol];
+
+                // Check if the move results in capturing the king
+                if (targetPiece.toLowerCase() === 'k') {
+                    setPlayer("Game Over! ".concat(player, " wins!")); // Declare current player as the winner
+                    setIsGameOver(true);
+                } else {
+                    map[destRow][destCol] = map[selectRow][selectCol];
+                    map[selectRow][selectCol] = '';
+                    setGame(map); // update board
+                    changePlayer(); // update player
                 }
-                changePlayer(isGameOver); // update player
             }
 
             // Handle square click
             function handleClick(row, col) {
+                if (isGameOver) return; // If game is over, do nothing
+
                 if (!selectedSquare) {
                     // Check if the player is White and can select only white pieces, or Black and can select only black pieces
                     if ((player === "White" && game[row][col] && game[row][col] === game[row][col].toUpperCase()) ||
@@ -137,7 +142,7 @@
 
             return (
                 <div>
-                    <h2>Michael Muratori - HTML Chess Game</h2>
+                    <h2>Chess Game</h2>
                     <h3>Current Player: {player}</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)', gap: '2px', margin: '20px 0' }}>
                         {game.map((row, rowIndex) => (
