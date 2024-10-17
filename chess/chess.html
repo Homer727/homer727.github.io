@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style>
         canvas {
             border: 1px solid #d3d3d3;
@@ -17,195 +15,29 @@
             font-size: 30px;
             color: black;
         }
-        #chessGame {
-            display: none; /* Initially hide the chess game */
+        #chessFrame {
+            display: none; /* Hide the iframe initially */
+            width: 100%;
+            height: 600px; /* Adjust height as needed */
+            border: none;
         }
     </style>
 </head>
 <body>
-    <!-- Start Screen -->
-    <div id="startScreen">
-        <br>
-        <button onclick="startGame()" id="Start_Button">Start Game</button>
-        <p>Michael Muratori - Chess Game</p> 
-        <h4>Press the Start Button to Start the Game</h4>
-    </div>
+    <br>
+    <button onclick="startGame()" id="Start_Button">Start Game</button>
 
-    <!-- Chess Game Screen (Initially Hidden) -->
-    <div id="chessGame">
-        <!-- This is where the exact chess game from chesstest.html will be -->
-        <canvas id="canvas" width="400" height="400"></canvas>
-        <br/>
-        <button onclick="restartGame()">Restart Game</button>
-        <button onclick="toggleMute()">Mute/Unmute</button>
-        <button onclick="forfeitGame()">Forfeit</button>
-        <div id="scoreDisplay">White: 0, Black: 0</div>
-    </div>
+    <p>Michael Muratori - Chess Game</p> 
+    <h4>Press the Start Button to Start the Game</h4>
+
+    <!-- Iframe to load the chess game -->
+    <iframe id="chessFrame" src="chesstest.html"></iframe>
 
     <script>
-        // Start game function to switch between screens
         function startGame() {
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('chessGame').style.display = 'block';
+            document.getElementById('Start_Button').style.display = 'none'; // Hide the start button
+            document.getElementById('chessFrame').style.display = 'block'; // Show the iframe
         }
-
-        // The exact code from `chesstest.html` starts here, no changes made
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-
-        const initialGameState = [
-            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
-        ];
-
-        const pieceImages = {
-            'r': 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg',
-            'n': 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg',
-            'b': 'https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg',
-            'q': 'https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg',
-            'k': 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg',
-            'p': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg',
-            'R': 'https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg',
-            'N': 'https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg',
-            'B': 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg',
-            'Q': 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg',
-            'K': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg',
-            'P': 'https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg'
-        };
-
-        let gameState = JSON.parse(JSON.stringify(initialGameState));
-        let player = "White";
-        let selectedSquare = null;
-        let isGameOver = false;
-        let whiteScore = 0;
-        let blackScore = 0;
-        let isMuted = false;
-        const audio = new Audio('https://www.soundjay.com/button/beep-07.wav');
-
-        // Draw the board and pieces
-        function drawBoard() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const isWhite = (row + col) % 2 === 0;
-                    ctx.fillStyle = isWhite ? "#f0d9b5" : "#b58863";
-                    ctx.fillRect(col * 50, row * 50, 50, 50);
-                    
-                    const piece = gameState[row][col];
-                    if (piece) {
-                        const img = new Image();
-                        img.src = pieceImages[piece];
-                        img.onload = () => {
-                            ctx.drawImage(img, col * 50, row * 50, 50, 50);
-                        };
-                    }
-                }
-            }
-        }
-
-        // Restart the game
-        function restartGame() {
-            gameState = JSON.parse(JSON.stringify(initialGameState));
-            player = "White";
-            selectedSquare = null;
-            isGameOver = false;
-            drawBoard();
-        }
-
-        // Handle forfeit
-        function forfeitGame() {
-            isGameOver = true;
-            alert(player + " has forfeited the game!");
-            if (player === "White") {
-                blackScore++;
-            } else {
-                whiteScore++;
-            }
-            updateScoreDisplay();
-        }
-
-        // Update the score display
-        function updateScoreDisplay() {
-            document.getElementById("scoreDisplay").textContent = `White: ${whiteScore}, Black: ${blackScore}`;
-        }
-
-        // Mute or unmute the game sound
-        function toggleMute() {
-            isMuted = !isMuted;
-        }
-
-        // Handle click on the board
-        canvas.addEventListener("click", (event) => {
-            if (isGameOver) return;
-
-            const x = event.offsetX;
-            const y = event.offsetY;
-            const row = Math.floor(y / 50);
-            const col = Math.floor(x / 50);
-
-            if (!selectedSquare) {
-                if ((player === "White" && gameState[row][col]?.toUpperCase() === gameState[row][col]) ||
-                    (player === "Black" && gameState[row][col]?.toLowerCase() === gameState[row][col])) {
-                    selectedSquare = { row, col };
-                }
-            } else {
-                const { row: srcRow, col: srcCol } = selectedSquare;
-                const piece = gameState[srcRow][srcCol];
-
-                if (canMove(piece, srcRow, srcCol, row, col)) {
-                    gameState[row][col] = piece;
-                    gameState[srcRow][srcCol] = "";
-                    player = player === "White" ? "Black" : "White";
-                    drawBoard();
-
-                    if (!isMuted) {
-                        audio.play();
-                    }
-                }
-                selectedSquare = null;
-            }
-        });
-
-        // Check if a move is valid
-        function canMove(piece, srcRow, srcCol, destRow, destCol) {
-            const rowDiff = Math.abs(destRow - srcRow);
-            const colDiff = Math.abs(destCol - srcCol);
-
-            switch (piece.toLowerCase()) {
-                case 'p':
-                    if (piece === 'P') {
-                        if (srcRow === 6 && destRow === 4 && srcCol === destCol && !gameState[destRow][destCol]) return true;
-                        if (destRow === srcRow - 1 && srcCol === destCol && !gameState[destRow][destCol]) return true;
-                        if (destRow === srcRow - 1 && Math.abs(destCol - srcCol) === 1 && gameState[destRow][destCol]?.toLowerCase()) return true;
-                    } else {
-                        if (srcRow === 1 && destRow === 3 && srcCol === destCol && !gameState[destRow][destCol]) return true;
-                        if (destRow === srcRow + 1 && srcCol === destCol && !gameState[destRow][destCol]) return true;
-                        if (destRow === srcRow + 1 && Math.abs(destCol - srcCol) === 1 && gameState[destRow][destCol]?.toUpperCase()) return true;
-                    }
-                    return false;
-                case 'r':
-                    return srcRow === destRow || srcCol === destCol;
-                case 'n':
-                    return rowDiff * colDiff === 2;
-                case 'b':
-                    return rowDiff === colDiff;
-                case 'q':
-                    return rowDiff === colDiff || srcRow === destRow || srcCol === destCol;
-                case 'k':
-                    return rowDiff <= 1 && colDiff <= 1;
-                default:
-                    return false;
-            }
-        }
-
-        // Initial draw
-        drawBoard();
     </script>
 </body>
 </html>
