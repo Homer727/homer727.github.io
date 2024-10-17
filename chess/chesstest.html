@@ -68,7 +68,7 @@
                 const colDiff = Math.abs(destCol - srcCol);
 
                 switch (piece.toLowerCase()) {
-                    case 'p':  // Pawn logic (simple version, without advanced rules like en passant or promotion)
+                    case 'p':  // Pawn logic (simple version, without advanced rules like en passant)
                         if (piece === 'P') { // White pawn
                             if (srcRow === 6 && destRow === 4 && srcCol === destCol && !game[destRow][destCol]) {
                                 return true; // Initial double step
@@ -102,6 +102,15 @@
                 }
             }
 
+            // Check for pawn promotion
+            function checkPromotion(map, row, col) {
+                if (map[row][col] === 'P' && row === 0) {
+                    map[row][col] = 'Q';  // Promote white pawn to queen
+                } else if (map[row][col] === 'p' && row === 7) {
+                    map[row][col] = 'q';  // Promote black pawn to queen
+                }
+            }
+
             // Handle movement and check for king capture
             function makeMove(currentMap, destRow, destCol, selectRow, selectCol) {
                 let map = currentMap.slice(); // copy array
@@ -114,6 +123,7 @@
                 } else {
                     map[destRow][destCol] = map[selectRow][selectCol];
                     map[selectRow][selectCol] = '';
+                    checkPromotion(map, destRow, destCol); // Check for promotion
                     setGame(map); // update board
                     changePlayer(); // update player
                 }
@@ -144,7 +154,7 @@
                 <div>
                     <h2>Chess Game</h2>
                     <h3>Current Player: {player}</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)', gap: '2px', margin: '20px 0' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)' }}>
                         {game.map((row, rowIndex) => (
                             row.map((piece, colIndex) => (
                                 <Square
