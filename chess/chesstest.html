@@ -15,7 +15,6 @@
     <script type="text/babel" data-presets="react,stage-3">
 
         // initial state of the board
-
         const initialGameState = [
             ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
             ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
@@ -82,7 +81,7 @@
                     }
                 } else if (selectedPiece === 'q') { // check if queen is blocked
                     if (selectRow === destRow || selectCol === destCol) {
-                        if (!isBlockedVert(currentMap, Math.max(destRow, selectRow), Math.min(destRow, selectRow), selectCol) && !isBlockedHoriz(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), selectRow) ) {
+                        if (!isBlockedVert(currentMap, Math.max(destRow, selectRow), Math.min(destRow, selectRow), selectCol) && !isBlockedHoriz(currentMap, Math.max(destCol, selectCol), Math.min(destCol, selectCol), selectRow)) {
                             makeMove(currentMap, destRow, destCol, selectRow, selectCol);
                         }
                     } else if (((selectRow - destRow) / (selectCol - destCol)) < 0) {
@@ -150,8 +149,10 @@
             // Handle square click
             function handleClick(row, col) {
                 if (!selectedSquare) {
-                    if ((player === "White" && game[row][col] !== game[row][col].toLowerCase() && game[row][col] !== "") || (player === "Black" && game[row][col] === game[row][col].toLowerCase())) {
-                        setSelectedSquare([row, col]); // set selected square if valid square selected
+                    // Check if the player is White and can select only white pieces, or Black and can select only black pieces
+                    if ((player === "White" && game[row][col] && game[row][col] === game[row][col].toUpperCase()) ||
+                        (player === "Black" && game[row][col] && game[row][col] === game[row][col].toLowerCase())) {
+                        setSelectedSquare([row, col]); // select the square if valid
                     }
                 } else {
                     const [selectedRow, selectedCol] = selectedSquare;
