@@ -79,27 +79,28 @@
             }
 
             function forfeit() {
-                setPlayer("Game Over! ".concat(player).concat(" loses!"));
+                const winner = player === "White" ? "Black" : "White";
+                setPlayer(`Game Over! ${winner} Wins!`);
                 setIsGameOver(true);
             }
 
             function restartGame() {
-            const freshBoard = [
-                 ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-                 ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-                 ['', '', '', '', '', '', '', ''],
-                 ['', '', '', '', '', '', '', ''],
-                 ['', '', '', '', '', '', '', ''],
-                 ['', '', '', '', '', '', '', ''],
-                 ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-                 ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
-            ];
+                const freshBoard = [
+                    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+                    ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+                    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+                ];
                 setGame(freshBoard);  // Reset the board to the original state
                 setPlayer("White");   // Reset the player to White
                 setTimer(0);          // Reset the timer to 0
                 setIsGameOver(false); // Reset the game-over status
                 setSelectedSquare(null); // Deselect any currently selected piece
-}
+            }
 
             function canMove(piece, srcRow, srcCol, destRow, destCol) {
                 const rowDiff = Math.abs(destRow - srcRow);
@@ -153,7 +154,8 @@
                 const targetPiece = map[destRow][destCol];
 
                 if (targetPiece.toLowerCase() === 'k') {
-                    setPlayer("Game Over! ".concat(player, " wins!"));
+                    const winner = player === "White" ? "Black" : "White";
+                    setPlayer(`Game Over! ${winner} Wins!`);
                     setIsGameOver(true);
                     clearInterval(intervalId);  // Stop the timer when the game ends
                 } else {
@@ -187,18 +189,17 @@
                 if (audioRef.current) {
                     if (audioRef.current.paused) {
                         audioRef.current.play();  // Start playing the music if it's paused
-            }
-                audioRef.current.muted = !audioRef.current.muted;
+                    }
+                    audioRef.current.muted = !audioRef.current.muted;
 
                     // Set volume to 70% if unmuted
                     if (!audioRef.current.muted) {
-                    audioRef.current.volume = 0.7;
+                        audioRef.current.volume = 0.7;
+                    }
+
+                    setIsMuted(!isMuted);
                 }
-
-                setIsMuted(!isMuted);
-        }
-    }
-
+            }
 
             return (
                 <div>
