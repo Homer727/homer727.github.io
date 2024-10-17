@@ -44,6 +44,7 @@
             const [selectedSquare, setSelectedSquare] = React.useState(null);
             const [player, setPlayer] = React.useState("White");
             const [isGameOver, setIsGameOver] = React.useState(false);
+            const [winnerMessage, setWinnerMessage] = React.useState('');
             const [timer, setTimer] = React.useState(0);
             const [intervalId, setIntervalId] = React.useState(null);
             const [isMuted, setIsMuted] = React.useState(false);
@@ -80,8 +81,9 @@
 
             function forfeit() {
                 const winner = player === "White" ? "Black" : "White";
-                setPlayer(`Game Over! ${winner} Wins!`);
+                setWinnerMessage(`${winner} Wins!`);
                 setIsGameOver(true);
+                clearInterval(intervalId); // Stop the timer on forfeit
             }
 
             function restartGame() {
@@ -99,6 +101,7 @@
                 setPlayer("White");   // Reset the player to White
                 setTimer(0);          // Reset the timer to 0
                 setIsGameOver(false); // Reset the game-over status
+                setWinnerMessage('');  // Reset winner message
                 setSelectedSquare(null); // Deselect any currently selected piece
             }
 
@@ -153,11 +156,12 @@
                 let map = currentMap.slice();
                 const targetPiece = map[destRow][destCol];
 
+                // Check for king capture
                 if (targetPiece.toLowerCase() === 'k') {
                     const winner = player === "White" ? "Black" : "White";
-                    setPlayer(`Game Over! ${winner} Wins!`);
+                    setWinnerMessage(`${winner} Wins!`);
                     setIsGameOver(true);
-                    clearInterval(intervalId);  // Stop the timer when the game ends
+                    clearInterval(intervalId); // Stop the timer on game over
                 } else {
                     map[destRow][destCol] = map[selectRow][selectCol];
                     map[selectRow][selectCol] = '';
@@ -172,7 +176,9 @@
 
                 if (!selectedSquare) {
                     if ((player === "White" && game[row][col] && game[row][col] === game[row][col].toUpperCase()) ||
-                        (player === "Black" && game[row][col] && game[row][col] === game[row][col].toLowerCase())) {
+                        (player === "Black" && game[row][col] && game[row][col] === game[row][col].toLowerCase()) ||
+                        (game[row][col] === 'k' && player === 'White') ||
+                        (game[row][col] === 'K' && player === 'Black')) {
                         setSelectedSquare([row, col]);
                     }
                 } else {
@@ -203,7 +209,7 @@
 
             return (
                 <div>
-                    <h2>{isGameOver ? "Game Over!" : `${player}'s Turn`}</h2>
+                    <h2>{isGameOver ? winnerMessage : `${player}'s Turn`}</h2>
                     <h3>Timer: {formatTime(timer)}</h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)', gridTemplateRows: 'repeat(8, 60px)' }}>
