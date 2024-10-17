@@ -187,11 +187,18 @@
                 if (audioRef.current) {
                     if (audioRef.current.paused) {
                         audioRef.current.play();  // Start playing the music if it's paused
-                    }
-                    audioRef.current.muted = !audioRef.current.muted;
-                    setIsMuted(!isMuted);
-                }
             }
+                audioRef.current.muted = !audioRef.current.muted;
+
+                    // Set volume to 80% if unmuted
+                    if (!audioRef.current.muted) {
+                    audioRef.current.volume = 0.8;
+                }
+
+                setIsMuted(!isMuted);
+        }
+    }
+
 
             return (
                 <div>
