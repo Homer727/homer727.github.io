@@ -15,16 +15,197 @@
             font-size: 30px;
             color: black;
         }
+        #chessGame {
+            display: none; /* Initially hide the chess game */
+        }
     </style>
 </head>
 <body>
-    <br>
-    <button onclick="startGame()" id="Start_Button">Start Game</button>
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <br>
+        <button onclick="startGame()" id="Start_Button">Start Game</button>
+        <p>Michael Muratori - Chess Game</p> 
+        <h4>Press the Start Button to Start the Game</h4>
+    </div>
 
-    <p>Michael Muratori - Chess Game</p> 
-    <h4>Press the Start Button to Start the Game</h4>
+    <!-- Chess Game Screen (Initially Hidden) -->
+    <div id="chessGame">
+        <div id="root"></div>
+    </div>
 
-    <!-- JavaScript File -->
-    <script src="chesstest.html"></script>
+    <!-- JavaScript and React for Chess Game -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone@7.10.3/babel.min.js" crossorigin></script>
+
+    <script type="text/babel" data-presets="react,stage-3">
+        // Define the startGame function to switch from start screen to chess game
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('chessGame').style.display = 'block';
+        }
+
+        const initialGameState = [
+            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+        ];
+
+        const pieceImages = {
+            'r': 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg',
+            'n': 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg',
+            'b': 'https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg',
+            'q': 'https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg',
+            'k': 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg',
+            'p': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg',
+            'R': 'https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg',
+            'N': 'https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg',
+            'B': 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg',
+            'Q': 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg',
+            'K': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg',
+            'P': 'https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg'
+        };
+
+        function Game() {
+            const [game, setGame] = React.useState(initialGameState);
+            const [selectedSquare, setSelectedSquare] = React.useState(null);
+            const [player, setPlayer] = React.useState("White");
+            const [isGameOver, setIsGameOver] = React.useState(false);
+            const [timer, setTimer] = React.useState(0);
+            const [intervalId, setIntervalId] = React.useState(null);
+            const [isMuted, setIsMuted] = React.useState(false);
+
+            const audioRef = React.useRef(null);
+
+            React.useEffect(() => {
+                if (!isGameOver) {
+                    const id = setInterval(() => setTimer((prev) => prev + 1), 1000);
+                    setIntervalId(id);
+                    return () => clearInterval(id);
+                } else if (isGameOver && intervalId) {
+                    clearInterval(intervalId);
+                }
+            }, [isGameOver]);
+
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+            }
+
+            function changePlayer() {
+                setPlayer(player === "White" ? "Black" : "White");
+                setTimer(0);
+            }
+
+            function forfeit() {
+                setPlayer(`Game Over! ${player} loses!`);
+                setIsGameOver(true);
+            }
+
+            function restartGame() {
+                setGame(initialGameState);
+                setPlayer("White");
+                setTimer(0);
+                setIsGameOver(false);
+                setSelectedSquare(null);
+            }
+
+            function canMove(piece, srcRow, srcCol, destRow, destCol) {
+                const rowDiff = Math.abs(destRow - srcRow);
+                const colDiff = Math.abs(destCol - srcCol);
+
+                switch (piece.toLowerCase()) {
+                    case 'p':
+                        if (piece === 'P') {
+                            if (srcRow === 6 && destRow === 4 && srcCol === destCol && !game[destRow][destCol]) return true;
+                            if (destRow === srcRow - 1 && srcCol === destCol && !game[destRow][destCol]) return true;
+                            if (destRow === srcRow - 1 && Math.abs(destCol - srcCol) === 1 && game[destRow][destCol]?.toLowerCase()) return true;
+                        } else {
+                            if (srcRow === 1 && destRow === 3 && srcCol === destCol && !game[destRow][destCol]) return true;
+                            if (destRow === srcRow + 1 && srcCol === destCol && !game[destRow][destCol]) return true;
+                            if (destRow === srcRow + 1 && Math.abs(destCol - srcCol) === 1 && game[destRow][destCol]?.toUpperCase()) return true;
+                        }
+                        return false;
+                    case 'r':
+                        return srcRow === destRow || srcCol === destCol;
+                    case 'n':
+                        return rowDiff * colDiff === 2;
+                    case 'b':
+                        return rowDiff === colDiff;
+                    case 'q':
+                        return srcRow === destRow || srcCol === destCol || rowDiff === colDiff;
+                    case 'k':
+                        return rowDiff <= 1 && colDiff <= 1;
+                    default:
+                        return false;
+                }
+            }
+
+            function makeMove(map, destRow, destCol, selectRow, selectCol) {
+                let newMap = map.slice();
+                if (newMap[destRow][destCol]?.toLowerCase() === 'k') {
+                    setPlayer(`Game Over! ${player} wins!`);
+                    setIsGameOver(true);
+                    clearInterval(intervalId);
+                } else {
+                    newMap[destRow][destCol] = newMap[selectRow][selectCol];
+                    newMap[selectRow][selectCol] = '';
+                    setGame(newMap);
+                    changePlayer();
+                }
+            }
+
+            function handleClick(row, col) {
+                if (isGameOver) return;
+
+                if (!selectedSquare) {
+                    if ((player === "White" && game[row][col]?.toUpperCase()) || (player === "Black" && game[row][col]?.toLowerCase())) {
+                        setSelectedSquare([row, col]);
+                    }
+                } else {
+                    const [selectedRow, selectedCol] = selectedSquare;
+                    if (canMove(game[selectedRow][selectedCol], selectedRow, selectedCol, row, col)) {
+                        makeMove(game, row, col, selectedRow, selectedCol);
+                    }
+                    setSelectedSquare(null);
+                }
+            }
+
+            return (
+                <div>
+                    <h2>{player}'s Turn</h2>
+                    <h3>Timer: {formatTime(timer)}</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)', gridTemplateRows: 'repeat(8, 60px)' }}>
+                        {game.map((row, rowIndex) => row.map((piece, colIndex) => (
+                            <div
+                                key={`${rowIndex}-${colIndex}`}
+                                onClick={() => handleClick(rowIndex, colIndex)}
+                                style={{
+                                    width: '60px', height: '60px',
+                                    backgroundColor: (rowIndex + colIndex) % 2 === 0 ? '#769656' : '#eeeed2',
+                                    display: 'flex', justifyContent: 'center', alignItems: 'center'
+                                }}
+                            >
+                                {piece && <img src={pieceImages[piece]} alt={piece} style={{ width: '100%', height: '100%' }} />}
+                            </div>
+                        )))}
+                    </div>
+                    <div>
+                        <button onClick={forfeit}>Forfeit</button>
+                        <button onClick={restartGame}>Restart Game</button>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<Game />);
+    </script>
 </body>
 </html>
