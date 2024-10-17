@@ -84,11 +84,13 @@
             }
 
             function restartGame() {
-                setGame(initialGameState);
-                setPlayer("White");
-                setTimer(0);
-                setIsGameOver(false);  // Reset game over status
-            }
+                setGame(initialGameState);  // Reset the board to its initial state
+                setPlayer("White");  // Reset the player to White
+                setTimer(0);  // Reset the timer to 0
+                setIsGameOver(false);  // Reset the game-over status
+                setSelectedSquare(null);  // Deselect any currently selected piece
+}
+
 
             function canMove(piece, srcRow, srcCol, destRow, destCol) {
                 const rowDiff = Math.abs(destRow - srcRow);
