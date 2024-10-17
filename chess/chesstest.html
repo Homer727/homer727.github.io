@@ -1,254 +1,162 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chessboard with Timer and Music</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone@7.10.3/babel.min.js" crossorigin></script>
-</head>
-<body>
-    <div id="root"></div>
+function Game() {
+    const [game, setGame] = React.useState(initialGameState);
+    const [selectedSquare, setSelectedSquare] = React.useState(null);
+    const [player, setPlayer] = React.useState("White");
+    const [isGameOver, setIsGameOver] = React.useState(false);
+    const [timer, setTimer] = React.useState(0);
+    const [intervalId, setIntervalId] = React.useState(null);
 
-    <script type="text/babel" data-presets="react,stage-3">
-        const initialGameState = [
-            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
-        ];
+    // Timer function
+    React.useEffect(() => {
+        if (!isGameOver) {
+            const id = setInterval(() => {
+                setTimer((prev) => prev + 1);
+            }, 1000);
+            setIntervalId(id);
 
-        const pieceImages = {
-            'r': 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg',
-            'n': 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg',
-            'b': 'https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg',
-            'q': 'https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg',
-            'k': 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg',
-            'p': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg',
-            'R': 'https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg',
-            'N': 'https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg',
-            'B': 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg',
-            'Q': 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg',
-            'K': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg',
-            'P': 'https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg'
-        };
+            return () => clearInterval(id); // Cleanup when the component unmounts
+        } else if (isGameOver && intervalId) {
+            clearInterval(intervalId);
+        }
+    }, [isGameOver]);
 
-        function Game() {
-            const [game, setGame] = React.useState(initialGameState);
-            const [selectedSquare, setSelectedSquare] = React.useState(null);
-            const [player, setPlayer] = React.useState("White");
-            const [isGameOver, setIsGameOver] = React.useState(false);
-            const [timer, setTimer] = React.useState(0);
-            const [intervalId, setIntervalId] = React.useState(null);
-            const [isMuted, setIsMuted] = React.useState(false);
+    // Format timer as MM:SS
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        const paddedMinutes = String(minutes).padStart(2, '0');
+        const paddedSeconds = String(remainingSeconds).padStart(2, '0');
+        return `${paddedMinutes}:${paddedSeconds}`;
+    }
 
-            const audioRef = React.useRef(null); // Reference to the audio element
+    function changePlayer() {
+        setPlayer(player === "White" ? "Black" : "White");
+        setTimer(0); // Reset timer for the next player
+    }
 
-            // Timer function
-            React.useEffect(() => {
-                if (!isGameOver) {
-                    const id = setInterval(() => {
-                        setTimer((prev) => prev + 1);
-                    }, 1000);
-                    setIntervalId(id);
+    function forfeit() {
+        setPlayer("Game Over! ".concat(player).concat(" loses!"));
+        setIsGameOver(true);
+    }
 
-                    return () => clearInterval(id); // Cleanup when the component unmounts
-                } else if (isGameOver && intervalId) {
-                    clearInterval(intervalId);
-                }
-            }, [isGameOver]);
+    function restartGame() {
+        setGame(initialGameState);
+        setPlayer("White");
+        setTimer(0);
+        setIsGameOver(false);  // Reset game over status
+    }
 
-            // Music playing on initial load
-            React.useEffect(() => {
-                if (audioRef.current) {
-                    audioRef.current.play();
-                }
-            }, []);
+    function canMove(piece, srcRow, srcCol, destRow, destCol) {
+        const rowDiff = Math.abs(destRow - srcRow);
+        const colDiff = Math.abs(destCol - srcCol);
 
-            // Format timer as MM:SS
-            function formatTime(seconds) {
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                const paddedMinutes = String(minutes).padStart(2, '0');
-                const paddedSeconds = String(remainingSeconds).padStart(2, '0');
-                return `${paddedMinutes}:${paddedSeconds}`;
-            }
-
-            function changePlayer() {
-                setPlayer(player === "White" ? "Black" : "White");
-                setTimer(0); // Reset timer for the next player
-            }
-
-            function forfeit() {
-                setPlayer("Game Over! ".concat(player).concat(" loses!"));
-                setIsGameOver(true);
-            }
-
-            function restartGame() {
-                setGame(initialGameState);
-                setPlayer("White");
-                setTimer(0);
-                setIsGameOver(false);  // Reset game over status
-            }
-
-            function canMove(piece, srcRow, srcCol, destRow, destCol) {
-                const rowDiff = Math.abs(destRow - srcRow);
-                const colDiff = Math.abs(destCol - srcCol);
-                const targetPiece = game[destRow][destCol];
-
-                // Check if the destination square is occupied by the player's own piece
-                if ((piece === piece.toUpperCase() && targetPiece === targetPiece?.toUpperCase()) ||
-                    (piece === piece.toLowerCase() && targetPiece === targetPiece?.toLowerCase())) {
-                    return false; // Cannot capture own piece
-                }
-
-                switch (piece.toLowerCase()) {
-                    case 'p':
-                        if (piece === 'P') {
-                            if (srcRow === 6 && destRow === 4 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Double move from starting position
-                            } else if (destRow === srcRow - 1 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Single move forward
-                            } else if (destRow === srcRow - 1 && Math.abs(destCol - srcCol) === 1 && targetPiece && targetPiece === targetPiece.toLowerCase()) {
-                                return true; // Capture diagonally
-                            }
-                        } else {
-                            if (srcRow === 1 && destRow === 3 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Double move from starting position
-                            } else if (destRow === srcRow + 1 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Single move forward
-                            } else if (destRow === srcRow + 1 && Math.abs(destCol - srcCol) === 1 && targetPiece && targetPiece === targetPiece.toUpperCase()) {
-                                return true; // Capture diagonally
-                            }
-                        }
-                        return false; // Invalid pawn move
-                    case 'r':
-                        return (srcRow === destRow || srcCol === destCol) && !isBlocked(srcRow, srcCol, destRow, destCol); // Rook moves
-                    case 'n':
-                        return rowDiff * colDiff === 2; // Knight moves
-                    case 'b':
-                        return rowDiff === colDiff && !isBlocked(srcRow, srcCol, destRow, destCol); // Bishop moves
-                    case 'q':
-                        return (srcRow === destRow || srcCol === destCol || rowDiff === colDiff) && !isBlocked(srcRow, srcCol, destRow, destCol); // Queen moves
-                    case 'k':
-                        return rowDiff <= 1 && colDiff <= 1; // King moves
-                    default:
-                        return false; // Invalid piece
-                }
-            }
-
-            function isBlocked(srcRow, srcCol, destRow, destCol) {
-                const rowStep = (destRow - srcRow) === 0 ? 0 : (destRow - srcRow) > 0 ? 1 : -1;
-                const colStep = (destCol - srcCol) === 0 ? 0 : (destCol - srcCol) > 0 ? 1 : -1;
-
-                let currentRow = srcRow + rowStep;
-                let currentCol = srcCol + colStep;
-
-                while (currentRow !== destRow || currentCol !== destCol) {
-                    if (game[currentRow][currentCol]) return true; // Blocked by another piece
-                    currentRow += rowStep;
-                    currentCol += colStep;
-                }
-                return false;
-            }
-
-            function checkPromotion(map, row, col) {
-                if (map[row][col] === 'P' && row === 0) {
-                    map[row][col] = 'Q'; // Promote to Queen
-                } else if (map[row][col] === 'p' && row === 7) {
-                    map[row][col] = 'q'; // Promote to Queen
-                }
-            }
-
-            function makeMove(currentMap, destRow, destCol, selectRow, selectCol) {
-                let map = currentMap.slice();
-                map[destRow][destCol] = map[selectRow][selectCol]; // Move the piece
-                map[selectRow][selectCol] = ''; // Clear the old position
-                checkPromotion(map, destRow, destCol); // Check for promotion
-                setGame(map);
-                changePlayer(); // Change turns
-            }
-
-            function handleClick(row, col) {
-                if (selectedSquare === null) {
-                    const piece = game[row][col];
-                    if (piece && ((player === "White" && piece === piece.toUpperCase()) || (player === "Black" && piece === piece.toLowerCase()))) {
-                        setSelectedSquare([row, col]); // Select the piece
+        switch (piece.toLowerCase()) {
+            case 'p':
+                if (piece === 'P') {
+                    if (srcRow === 6 && destRow === 4 && srcCol === destCol && !game[destRow][destCol]) {
+                        return true;
+                    } else if (destRow === srcRow - 1 && srcCol === destCol && !game[destRow][destCol]) {
+                        return true;
+                    } else if (destRow === srcRow - 1 && Math.abs(destCol - srcCol) === 1 && game[destRow][destCol] && game[destRow][destCol] === game[destRow][destCol].toLowerCase()) {
+                        return true;
                     }
                 } else {
-                    const [selectedRow, selectedCol] = selectedSquare;
-                    const piece = game[selectedRow][selectedCol];
-
-                    if (canMove(piece, selectedRow, selectedCol, row, col)) {
-                        makeMove(game, row, col, selectedRow, selectedCol);
+                    if (srcRow === 1 && destRow === 3 && srcCol === destCol && !game[destRow][destCol]) {
+                        return true;
+                    } else if (destRow === srcRow + 1 && srcCol === destCol && !game[destRow][destCol]) {
+                        return true;
+                    } else if (destRow === srcRow + 1 && Math.abs(destCol - srcCol) === 1 && game[destRow][destCol] && game[destRow][destCol] === game[destRow][destCol].toUpperCase()) {
+                        return true;
                     }
-                    setSelectedSquare(null); // Deselect the square
                 }
+                return false;
+            case 'r':
+                return srcRow === destRow || srcCol === destCol;
+            case 'n':
+                return rowDiff * colDiff === 2;
+            case 'b':
+                return rowDiff === colDiff;
+            case 'q':
+                return srcRow === destRow || srcCol === destCol || rowDiff === colDiff;
+            case 'k':
+                return rowDiff <= 1 && colDiff <= 1;
+            default:
+                return false;
+        }
+    }
+
+    function checkPromotion(map, row, col) {
+        if (map[row][col] === 'P' && row === 0) {
+            map[row][col] = 'Q';
+        } else if (map[row][col] === 'p' && row === 7) {
+            map[row][col] = 'q';
+        }
+    }
+
+    function makeMove(currentMap, destRow, destCol, selectRow, selectCol) {
+        let map = currentMap.slice();
+        const targetPiece = map[destRow][destCol];
+
+        if (targetPiece.toLowerCase() === 'k') {
+            setPlayer("Game Over! ".concat(player, " wins!"));
+            setIsGameOver(true);
+            clearInterval(intervalId);  // Stop the timer when the game ends
+        } else {
+            map[destRow][destCol] = map[selectRow][selectCol];
+            map[selectRow][selectCol] = '';
+            checkPromotion(map, destRow, destCol);
+            setGame(map);
+            changePlayer();
+        }
+    }
+
+    function handleClick(row, col) {
+        if (isGameOver) return;
+
+        if (!selectedSquare) {
+            if ((player === "White" && game[row][col] && game[row][col] === game[row][col].toUpperCase()) ||
+                (player === "Black" && game[row][col] && game[row][col] === game[row][col].toLowerCase())) {
+                setSelectedSquare([row, col]); // Select the piece
+            }
+        } else {
+            const [selectedRow, selectedCol] = selectedSquare;
+            const selectedPiece = game[selectedRow][selectedCol];
+
+            // If the same piece is clicked again, do nothing (keep it selected)
+            if (row === selectedRow && col === selectedCol) {
+                return; // Do not deselect
             }
 
-            function toggleMute() {
-                if (audioRef.current) {
-                    audioRef.current.muted = !audioRef.current.muted;
-                    setIsMuted(!isMuted);
-                }
+            // If a different square is clicked, check if the move is valid
+            if (canMove(selectedPiece, selectedRow, selectedCol, row, col)) {
+                makeMove(game, row, col, selectedRow, selectedCol);
             }
 
-            return (
-                <div>
-                    <h2>{player}'s Turn</h2>
-                    <h3>Timer: {formatTime(timer)}</h3>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)', gridTemplateRows: 'repeat(8, 60px)' }}>
-                        {game.map((row, rowIndex) => (
-                            row.map((piece, colIndex) => (
-                                <Square
-                                    key={`${rowIndex}-${colIndex}`}
-                                    value={piece}
-                                    onClick={() => handleClick(rowIndex, colIndex)}
-                                    isLight={(rowIndex + colIndex) % 2 === 0}
-                                    isSelected={selectedSquare && selectedSquare[0] === rowIndex && selectedSquare[1] === colIndex}
-                                />
-                            ))
-                        ))}
-                    </div>
-
-                    {!isGameOver && <button onClick={forfeit}>Forfeit</button>}
-                    <button onClick={restartGame}>Restart</button>
-                    <button onClick={toggleMute}>{isMuted ? 'Unmute' : 'Mute'}</button>
-
-                    <audio ref={audioRef} src="Apotos (Night) - Sonic Unleashed [OST].mp3" loop />
-                </div>
-            );
+            // Deselect the square after attempting to move
+            setSelectedSquare(null);
         }
+    }
 
-        function Square({ value, onClick, isLight, isSelected }) {
-            const pieceImage = value ? pieceImages[value] : null;
-            return (
-                <div
-                    onClick={onClick}
-                    style={{
-                        width: '60px',
-                        height: '60px',
-                        backgroundColor: isSelected ? 'yellow' : isLight ? '#f0d9b5' : '#b58863',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '1px solid #333',
-                        cursor: 'pointer'
-                    }}
-                >
-                    {pieceImage && <img src={pieceImage} alt={value} style={{ width: '50px', height: '50px' }} />}
-                </div>
-            );
-        }
-
-        ReactDOM.render(<Game />, document.getElementById('root'));
-    </script>
-</body>
-</html>
+    return (
+        <div>
+            <h2>Chess Game</h2>
+            <h3>Current Player: {player}</h3>
+            <h4>Time: {formatTime(timer)}</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)' }}>
+                {game.map((row, rowIndex) => (
+                    row.map((piece, colIndex) => (
+                        <Square
+                            key={`${rowIndex}-${colIndex}`}
+                            value={piece}
+                            onClick={() => handleClick(rowIndex, colIndex)}
+                            isLight={(rowIndex + colIndex) % 2 === 0}
+                            isSelected={selectedSquare && selectedSquare[0] === rowIndex && selectedSquare[1] === colIndex}
+                        />
+                    ))
+                ))}
+            </div>
+            {!isGameOver && <button onClick={forfeit}>Forfeit</button>}
+            <button onClick={restartGame}>Restart</button>
+        </div>
+    );
+}
