@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chessboard with Timer</title>
+    <title>Chessboard with Timer and Music</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone@7.10.3/babel.min.js" crossorigin></script>
@@ -13,7 +13,6 @@
     <div id="root"></div>
 
     <script type="text/babel" data-presets="react,stage-3">
-
         const initialGameState = [
             ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
             ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
@@ -47,6 +46,9 @@
             const [isGameOver, setIsGameOver] = React.useState(false);
             const [timer, setTimer] = React.useState(0);
             const [intervalId, setIntervalId] = React.useState(null);
+            const [isMuted, setIsMuted] = React.useState(false);
+
+            const audioRef = React.useRef(null); // Reference to the audio element
 
             // Timer function
             React.useEffect(() => {
@@ -61,6 +63,13 @@
                     clearInterval(intervalId);
                 }
             }, [isGameOver]);
+
+            // Music playing on initial load
+            React.useEffect(() => {
+                if (audioRef.current) {
+                    audioRef.current.play();
+                }
+            }, []);
 
             // Format timer as MM:SS
             function formatTime(seconds) {
@@ -170,12 +179,19 @@
                 }
             }
 
+            function toggleMute() {
+                if (audioRef.current) {
+                    audioRef.current.muted = !audioRef.current.muted;
+                    setIsMuted(!isMuted);
+                }
+            }
+
             return (
                 <div>
-                    <h2>Chess Game</h2>
-                    <h3>Current Player: {player}</h3>
-                    <h4>Time: {formatTime(timer)}</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)' }}>
+                    <h2>{player}'s Turn</h2>
+                    <h3>Timer: {formatTime(timer)}</h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)', gridTemplateRows: 'repeat(8, 60px)' }}>
                         {game.map((row, rowIndex) => (
                             row.map((piece, colIndex) => (
                                 <Square
@@ -188,8 +204,12 @@
                             ))
                         ))}
                     </div>
+
                     {!isGameOver && <button onClick={forfeit}>Forfeit</button>}
                     <button onClick={restartGame}>Restart</button>
+                    <button onClick={toggleMute}>{isMuted ? 'Unmute' : 'Mute'}</button>
+
+                    <audio ref={audioRef} src="Music.mp3" loop />
                 </div>
             );
         }
@@ -216,7 +236,6 @@
         }
 
         ReactDOM.render(<Game />, document.getElementById('root'));
-
     </script>
 </body>
 </html>
