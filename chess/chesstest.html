@@ -112,42 +112,42 @@
                     case 'p':
                         if (piece === 'P') {
                             if (srcRow === 6 && destRow === 4 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true;
+                                return true; // Double move from starting position
                             } else if (destRow === srcRow - 1 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true;
+                                return true; // Single move forward
                             } else if (destRow === srcRow - 1 && Math.abs(destCol - srcCol) === 1 && targetPiece && targetPiece === targetPiece.toLowerCase()) {
-                                return true;
+                                return true; // Capture diagonally
                             }
                         } else {
                             if (srcRow === 1 && destRow === 3 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true;
+                                return true; // Double move from starting position
                             } else if (destRow === srcRow + 1 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true;
+                                return true; // Single move forward
                             } else if (destRow === srcRow + 1 && Math.abs(destCol - srcCol) === 1 && targetPiece && targetPiece === targetPiece.toUpperCase()) {
-                                return true;
+                                return true; // Capture diagonally
                             }
                         }
-                        return false;
+                        return false; // Invalid pawn move
                     case 'r':
-                        return srcRow === destRow || srcCol === destCol;
+                        return srcRow === destRow || srcCol === destCol; // Rook moves
                     case 'n':
-                        return rowDiff * colDiff === 2;
+                        return rowDiff * colDiff === 2; // Knight moves
                     case 'b':
-                        return rowDiff === colDiff;
+                        return rowDiff === colDiff; // Bishop moves
                     case 'q':
-                        return srcRow === destRow || srcCol === destCol || rowDiff === colDiff;
+                        return srcRow === destRow || srcCol === destCol || rowDiff === colDiff; // Queen moves
                     case 'k':
-                        return rowDiff <= 1 && colDiff <= 1;
+                        return rowDiff <= 1 && colDiff <= 1; // King moves
                     default:
-                        return false;
+                        return false; // Invalid piece
                 }
             }
 
             function checkPromotion(map, row, col) {
                 if (map[row][col] === 'P' && row === 0) {
-                    map[row][col] = 'Q';
+                    map[row][col] = 'Q'; // Promote to Queen
                 } else if (map[row][col] === 'p' && row === 7) {
-                    map[row][col] = 'q';
+                    map[row][col] = 'q'; // Promote to Queen
                 }
             }
 
@@ -178,8 +178,9 @@
                     }
                 } else {
                     const [selectedRow, selectedCol] = selectedSquare;
-                    const selectedPiece = game[selectedRow][selectedCol];
-                    if (canMove(selectedPiece, selectedRow, selectedCol, row, col)) {
+                    const piece = game[selectedRow][selectedCol];
+
+                    if (canMove(piece, selectedRow, selectedCol, row, col)) {
                         makeMove(game, row, col, selectedRow, selectedCol);
                     }
                     setSelectedSquare(null);
