@@ -82,7 +82,10 @@
             }
 
             function restartGame() {
-                window.location.reload();
+                setGame(initialGameState);
+                setPlayer("White");
+                setTimer(0);
+                setIsGameOver(false);  // Reset game over status
             }
 
             function canMove(piece, srcRow, srcCol, destRow, destCol) {
@@ -185,7 +188,7 @@
                             ))
                         ))}
                     </div>
-                    <button onClick={forfeit}>Forfeit</button>
+                    {!isGameOver && <button onClick={forfeit}>Forfeit</button>}
                     <button onClick={restartGame}>Restart</button>
                 </div>
             );
