@@ -153,9 +153,11 @@
                 const targetPiece = map[destRow][destCol];
 
                 if (targetPiece.toLowerCase() === 'k') {
-                    setPlayer("Game Over! ".concat(player, " wins!"));
-                    setIsGameOver(true);
-                    clearInterval(intervalId);  // Stop the timer when the game ends
+            // Determine the winner based on the current player
+            const winner = player === "White" ? "Black" : "White";
+            setPlayer(`Game Over! ${winner} Wins!`);
+            setIsGameOver(true);
+            clearInterval(intervalId);  // Stop the timer when the game ends
                 } else {
                     map[destRow][destCol] = map[selectRow][selectCol];
                     map[selectRow][selectCol] = '';
