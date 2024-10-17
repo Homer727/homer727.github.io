@@ -84,12 +84,13 @@
             }
 
             function restartGame() {
-                setGame(initialGameState);  // Reset the board to its initial state
+                setGame(JSON.parse(JSON.stringify(initialGameState)));  // Reset the board to its initial state (deep copy)
                 setPlayer("White");  // Reset the player to White
                 setTimer(0);  // Reset the timer to 0
                 setIsGameOver(false);  // Reset the game-over status
                 setSelectedSquare(null);  // Deselect any currently selected piece
 }
+
 
 
             function canMove(piece, srcRow, srcCol, destRow, destCol) {
