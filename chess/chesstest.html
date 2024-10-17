@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chessboard with Piece Images</title>
+    <title>Chessboard with Timer</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone@7.10.3/babel.min.js" crossorigin></script>
@@ -14,7 +14,6 @@
 
     <script type="text/babel" data-presets="react,stage-3">
 
-        // initial state of the board
         const initialGameState = [
             ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
             ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
@@ -26,7 +25,6 @@
             ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
         ];
 
-        // load images for pieces
         const pieceImages = {
             'r': 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg',
             'n': 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg',
@@ -43,110 +41,120 @@
         };
 
         function Game() {
-            const [game, setGame] = React.useState(initialGameState); // state hook for current game board
-            const [selectedSquare, setSelectedSquare] = React.useState(null); // state hook for currently selected square
-            const [player, setPlayer] = React.useState("White");  // state hook for current turn
-            const [isGameOver, setIsGameOver] = React.useState(false); // track game-over state
+            const [game, setGame] = React.useState(initialGameState);
+            const [selectedSquare, setSelectedSquare] = React.useState(null);
+            const [player, setPlayer] = React.useState("White");
+            const [isGameOver, setIsGameOver] = React.useState(false);
+            const [timer, setTimer] = React.useState(0);
+            const [intervalId, setIntervalId] = React.useState(null);
 
-            // Handle changing current player
+            // Timer function
+            React.useEffect(() => {
+                if (!isGameOver) {
+                    const id = setInterval(() => {
+                        setTimer((prev) => prev + 1);
+                    }, 1000);
+                    setIntervalId(id);
+
+                    return () => clearInterval(id); // Cleanup when the component unmounts
+                } else if (isGameOver && intervalId) {
+                    clearInterval(intervalId);
+                }
+            }, [isGameOver]);
+
             function changePlayer() {
                 setPlayer(player === "White" ? "Black" : "White");
+                setTimer(0); // Reset timer for the next player
             }
 
-            function forfeit() { // code to make forfeit button work
+            function forfeit() {
                 setPlayer("Game Over! ".concat(player).concat(" loses!"));
                 setIsGameOver(true);
             }
 
-            function restartGame() { // code to restart game
-                window.location.reload(); // refreshes page
+            function restartGame() {
+                window.location.reload();
             }
 
-            // Movement rules for different pieces
             function canMove(piece, srcRow, srcCol, destRow, destCol) {
                 const rowDiff = Math.abs(destRow - srcRow);
                 const colDiff = Math.abs(destCol - srcCol);
 
                 switch (piece.toLowerCase()) {
-                    case 'p':  // Pawn logic (simple version, without advanced rules like en passant)
-                        if (piece === 'P') { // White pawn
+                    case 'p':
+                        if (piece === 'P') {
                             if (srcRow === 6 && destRow === 4 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Initial double step
+                                return true;
                             } else if (destRow === srcRow - 1 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Normal single step
+                                return true;
                             } else if (destRow === srcRow - 1 && Math.abs(destCol - srcCol) === 1 && game[destRow][destCol] && game[destRow][destCol] === game[destRow][destCol].toLowerCase()) {
-                                return true; // Capture
+                                return true;
                             }
-                        } else { // Black pawn
+                        } else {
                             if (srcRow === 1 && destRow === 3 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Initial double step
+                                return true;
                             } else if (destRow === srcRow + 1 && srcCol === destCol && !game[destRow][destCol]) {
-                                return true; // Normal single step
+                                return true;
                             } else if (destRow === srcRow + 1 && Math.abs(destCol - srcCol) === 1 && game[destRow][destCol] && game[destRow][destCol] === game[destRow][destCol].toUpperCase()) {
-                                return true; // Capture
+                                return true;
                             }
                         }
                         return false;
-                    case 'r':  // Rook logic
-                        return srcRow === destRow || srcCol === destCol; // Rooks move straight
-                    case 'n':  // Knight logic
-                        return rowDiff * colDiff === 2; // Knights move in an L shape
-                    case 'b':  // Bishop logic
-                        return rowDiff === colDiff; // Bishops move diagonally
-                    case 'q':  // Queen logic
-                        return srcRow === destRow || srcCol === destCol || rowDiff === colDiff; // Queens move like a rook or a bishop
-                    case 'k':  // King logic (ignoring castling for now)
-                        return rowDiff <= 1 && colDiff <= 1; // Kings move one square in any direction
+                    case 'r':
+                        return srcRow === destRow || srcCol === destCol;
+                    case 'n':
+                        return rowDiff * colDiff === 2;
+                    case 'b':
+                        return rowDiff === colDiff;
+                    case 'q':
+                        return srcRow === destRow || srcCol === destCol || rowDiff === colDiff;
+                    case 'k':
+                        return rowDiff <= 1 && colDiff <= 1;
                     default:
                         return false;
                 }
             }
 
-            // Check for pawn promotion
             function checkPromotion(map, row, col) {
                 if (map[row][col] === 'P' && row === 0) {
-                    map[row][col] = 'Q';  // Promote white pawn to queen
+                    map[row][col] = 'Q';
                 } else if (map[row][col] === 'p' && row === 7) {
-                    map[row][col] = 'q';  // Promote black pawn to queen
+                    map[row][col] = 'q';
                 }
             }
 
-            // Handle movement and check for king capture
             function makeMove(currentMap, destRow, destCol, selectRow, selectCol) {
-                let map = currentMap.slice(); // copy array
+                let map = currentMap.slice();
                 const targetPiece = map[destRow][destCol];
 
-                // Check if the move results in capturing the king
                 if (targetPiece.toLowerCase() === 'k') {
-                    setPlayer("Game Over! ".concat(player, " wins!")); // Declare current player as the winner
+                    setPlayer("Game Over! ".concat(player, " wins!"));
                     setIsGameOver(true);
+                    clearInterval(intervalId);  // Stop the timer when the game ends
                 } else {
                     map[destRow][destCol] = map[selectRow][selectCol];
                     map[selectRow][selectCol] = '';
-                    checkPromotion(map, destRow, destCol); // Check for promotion
-                    setGame(map); // update board
-                    changePlayer(); // update player
+                    checkPromotion(map, destRow, destCol);
+                    setGame(map);
+                    changePlayer();
                 }
             }
 
-            // Handle square click
             function handleClick(row, col) {
-                if (isGameOver) return; // If game is over, do nothing
+                if (isGameOver) return;
 
                 if (!selectedSquare) {
-                    // Check if the player is White and can select only white pieces, or Black and can select only black pieces
                     if ((player === "White" && game[row][col] && game[row][col] === game[row][col].toUpperCase()) ||
                         (player === "Black" && game[row][col] && game[row][col] === game[row][col].toLowerCase())) {
-                        setSelectedSquare([row, col]); // select the square if valid
+                        setSelectedSquare([row, col]);
                     }
                 } else {
                     const [selectedRow, selectedCol] = selectedSquare;
                     const selectedPiece = game[selectedRow][selectedCol];
-                    // Check if the move is valid for the piece
                     if (canMove(selectedPiece, selectedRow, selectedCol, row, col)) {
                         makeMove(game, row, col, selectedRow, selectedCol);
                     }
-                    setSelectedSquare(null); // after move (valid or not), reset selected square
+                    setSelectedSquare(null);
                 }
             }
 
@@ -154,6 +162,7 @@
                 <div>
                     <h2>Chess Game</h2>
                     <h3>Current Player: {player}</h3>
+                    <h4>Time: {timer} seconds</h4>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 60px)' }}>
                         {game.map((row, rowIndex) => (
                             row.map((piece, colIndex) => (
@@ -173,7 +182,6 @@
             );
         }
 
-        // Define the Square component
         function Square({ value, onClick, isLight, isSelected }) {
             const pieceImage = value ? pieceImages[value] : null;
             return (
@@ -195,7 +203,6 @@
             );
         }
 
-        // Render the Game component into the root div
         ReactDOM.render(<Game />, document.getElementById('root'));
 
     </script>
