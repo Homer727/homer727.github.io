@@ -129,18 +129,33 @@
                         }
                         return false; // Invalid pawn move
                     case 'r':
-                        return srcRow === destRow || srcCol === destCol; // Rook moves
+                        return (srcRow === destRow || srcCol === destCol) && !isBlocked(srcRow, srcCol, destRow, destCol); // Rook moves
                     case 'n':
                         return rowDiff * colDiff === 2; // Knight moves
                     case 'b':
-                        return rowDiff === colDiff; // Bishop moves
+                        return rowDiff === colDiff && !isBlocked(srcRow, srcCol, destRow, destCol); // Bishop moves
                     case 'q':
-                        return srcRow === destRow || srcCol === destCol || rowDiff === colDiff; // Queen moves
+                        return (srcRow === destRow || srcCol === destCol || rowDiff === colDiff) && !isBlocked(srcRow, srcCol, destRow, destCol); // Queen moves
                     case 'k':
                         return rowDiff <= 1 && colDiff <= 1; // King moves
                     default:
                         return false; // Invalid piece
                 }
+            }
+
+            function isBlocked(srcRow, srcCol, destRow, destCol) {
+                const rowStep = (destRow - srcRow) === 0 ? 0 : (destRow - srcRow) > 0 ? 1 : -1;
+                const colStep = (destCol - srcCol) === 0 ? 0 : (destCol - srcCol) > 0 ? 1 : -1;
+
+                let currentRow = srcRow + rowStep;
+                let currentCol = srcCol + colStep;
+
+                while (currentRow !== destRow || currentCol !== destCol) {
+                    if (game[currentRow][currentCol]) return true; // Blocked by another piece
+                    currentRow += rowStep;
+                    currentCol += colStep;
+                }
+                return false;
             }
 
             function checkPromotion(map, row, col) {
@@ -153,28 +168,18 @@
 
             function makeMove(currentMap, destRow, destCol, selectRow, selectCol) {
                 let map = currentMap.slice();
-                const targetPiece = map[destRow][destCol];
-
-                if (targetPiece.toLowerCase() === 'k') {
-                    setPlayer("Game Over! ".concat(player, " wins!"));
-                    setIsGameOver(true);
-                    clearInterval(intervalId);  // Stop the timer when the game ends
-                } else {
-                    map[destRow][destCol] = map[selectRow][selectCol];
-                    map[selectRow][selectCol] = '';
-                    checkPromotion(map, destRow, destCol);
-                    setGame(map);
-                    changePlayer();
-                }
+                map[destRow][destCol] = map[selectRow][selectCol]; // Move the piece
+                map[selectRow][selectCol] = ''; // Clear the old position
+                checkPromotion(map, destRow, destCol); // Check for promotion
+                setGame(map);
+                changePlayer(); // Change turns
             }
 
             function handleClick(row, col) {
-                if (isGameOver) return;
-
-                if (!selectedSquare) {
-                    if ((player === "White" && game[row][col] && game[row][col] === game[row][col].toUpperCase()) ||
-                        (player === "Black" && game[row][col] && game[row][col] === game[row][col].toLowerCase())) {
-                        setSelectedSquare([row, col]);
+                if (selectedSquare === null) {
+                    const piece = game[row][col];
+                    if (piece && ((player === "White" && piece === piece.toUpperCase()) || (player === "Black" && piece === piece.toLowerCase()))) {
+                        setSelectedSquare([row, col]); // Select the piece
                     }
                 } else {
                     const [selectedRow, selectedCol] = selectedSquare;
@@ -183,7 +188,7 @@
                     if (canMove(piece, selectedRow, selectedCol, row, col)) {
                         makeMove(game, row, col, selectedRow, selectedCol);
                     }
-                    setSelectedSquare(null);
+                    setSelectedSquare(null); // Deselect the square
                 }
             }
 
