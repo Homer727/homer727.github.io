@@ -206,6 +206,7 @@
                     </div>
 
                     {!isGameOver && <button onClick={forfeit}>Forfeit</button>}
+                    <button onClick={restartGame}>Restart</button>
                     <button onClick={toggleMute}>{isMuted ? 'Unmute' : 'Mute'}</button>
 
                     <audio ref={audioRef} src="Apotos (Night) - Sonic Unleashed [OST].mp3" loop />
