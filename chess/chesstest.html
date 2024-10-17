@@ -79,9 +79,8 @@
             }
 
             function forfeit() {
-                setPlayer("Game Over! ".concat(player).concat(" loses!"));
+                setPlayer("Game Over! " + player + " loses!");
                 setIsGameOver(true);
-            }
 
             function restartGame() {
             const freshBoard = [
@@ -152,8 +151,8 @@
                 let map = currentMap.slice();
                 const targetPiece = map[destRow][destCol];
 
-                if (targetPiece.toLowerCase() === 'k') {
-                    setPlayer("Game Over! ".concat(player, " wins!"));
+                 if (targetPiece.toLowerCase() === 'k') {
+                    setPlayer("Game Over! " + player + " wins!");
                     setIsGameOver(true);
                     clearInterval(intervalId);  // Stop the timer when the game ends
                 } else {
