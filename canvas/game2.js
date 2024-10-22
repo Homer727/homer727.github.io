@@ -156,6 +156,7 @@ function updateGameArea() {
 
     var x, height, gap, minHeight, maxHeight, minGap, maxGap;
 
+    // Check for collisions
     for (i = 0; i < myObstacles.length; i += 1) {
         if (myGamePiece.crashWith(myObstacles[i])) {
             playExplosionEffect();
@@ -171,6 +172,7 @@ function updateGameArea() {
     background.newPos();
     background.update();
 
+    // Generate new obstacles at intervals
     if (myGameArea.frameNo == 1 || everyinterval(150)) {
         x = myGameArea.canvas.width;
         minHeight = 20;
@@ -179,24 +181,23 @@ function updateGameArea() {
         minGap = 50;
         maxGap = 200;
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-        myObstacles.push(new component(10, height, "red", x, 0));
-        myObstacles.push(new component(10, x - height - gap, "red", x, height + gap));
-
-        var upperObstacle = new gameObject(10, height, "Laser-Beam-PNG-HD-Image.png", x, 0, "obstacle");
-        upperObstacle.angle = Math.PI/2; // Rotate 90 degrees
+        
+        // Create upper and lower obstacles with the laser beam image
+        var upperObstacle = new component(10, height, "obstacleImage", x, 0, "Laser-Beam-PNG-HD-Image.png");
+        var lowerObstacle = new component(10, x - height - gap, "obstacleImage", x, height + gap, "Laser-Beam-PNG-HD-Image.png");
+        
+        // Add obstacles to the array
         myObstacles.push(upperObstacle);
-
-         var lowerObstacle = new gameObject(10, x - height - gap, "Laser-Beam-PNG-HD-Image.png", x, height + gap, "obstacle");
-         myObstacles.push(lowerObstacle);
-         upperObstacle.angle = Math.PI/2; // Rotate 90 degrees
-
+        myObstacles.push(lowerObstacle);
     }
 
+    // Move and update obstacles
     for (i = 0; i < myObstacles.length; i += 1) {
-        myObstacles[i].x += -1;
+        myObstacles[i].x += -1; // Move obstacles left
         myObstacles[i].update();
     }
 
+    // Handle game piece movement
     myGamePiece.speedX = 0;
     myGamePiece.speedY = 0;
     if (myGameArea.keys && myGameArea.keys[37]) { myGamePiece.speedX = -1; } // Left arrow
@@ -207,8 +208,10 @@ function updateGameArea() {
     myGamePiece.newPos();
     myGamePiece.update();
 
+    // Update the score display
     document.getElementById('scoreDisplay').textContent = "SCORE: " + myGameArea.frameNo;
 }
+
 
 function everyinterval(n) {
     return (myGameArea.frameNo / n) % 1 === 0;
