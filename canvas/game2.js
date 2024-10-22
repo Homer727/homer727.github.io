@@ -97,20 +97,8 @@ function component(width, height, type, x, y, src) {
                 if (type === "background") {
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                     ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
-                } 
-                 else if (type === "obstacleImage") {
-                    // Save the current context state before applying rotation
-                    ctx.save();
-                    // Move to the center of the obstacle
-                    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-                    // Rotate the canvas 90 degrees to make the image vertical
-                    ctx.rotate(Math.PI / 2);
-                    // Draw the image at the adjusted position
-                    ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
-                    // Restore the original context state
-                    ctx.restore();
-                 }
-                else {
+                } else {
+                    // Draw image normally for obstacles
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 }
             }
@@ -183,8 +171,8 @@ function updateGameArea() {
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
         
         // Create upper and lower obstacles with the laser beam image
-        var upperObstacle = new component(10, height, "obstacleImage", x, 0, "Laser-Beam-PNG-HD-Image.png");
-        var lowerObstacle = new component(10, x - height - gap, "obstacleImage", x, height + gap, "Laser-Beam-PNG-HD-Image.png");
+        var upperObstacle = new component(40, height, "image", x, 0, "Laser-Beam-PNG-HD-Image.png");
+        var lowerObstacle = new component(40, x - height - gap, "image", x, height + gap, "Laser-Beam-PNG-HD-Image.png");
         
         // Add obstacles to the array
         myObstacles.push(upperObstacle);
@@ -211,7 +199,6 @@ function updateGameArea() {
     // Update the score display
     document.getElementById('scoreDisplay').textContent = "SCORE: " + myGameArea.frameNo;
 }
-
 
 function everyinterval(n) {
     return (myGameArea.frameNo / n) % 1 === 0;
