@@ -97,7 +97,20 @@ function component(width, height, type, x, y, src) {
                 if (type === "background") {
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                     ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
-                } else {
+                } 
+                 else if (type === "obstacleImage") {
+                    // Save the current context state before applying rotation
+                    ctx.save();
+                    // Move to the center of the obstacle
+                    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                    // Rotate the canvas 90 degrees to make the image vertical
+                    ctx.rotate(Math.PI / 2);
+                    // Draw the image at the adjusted position
+                    ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
+                    // Restore the original context state
+                    ctx.restore();
+                 }
+                else {
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 }
             }
