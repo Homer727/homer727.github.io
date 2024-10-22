@@ -172,7 +172,7 @@ function updateGameArea() {
         
         // Create upper and lower obstacles with the laser beam image
         var upperObstacle = new component(40, height, "image", x, 0, "Laser-Beam-PNG-HD-Image.png");
-        var lowerObstacle = new component(40, x - height - gap, "image", x, height + gap, "Laser-Beam-PNG-HD-Image.png");
+        var lowerObstacle = new component(40, myGameArea.canvas.height - height - gap, "image", x, height + gap, "Laser-Beam-PNG-HD-Image.png");
         
         // Add obstacles to the array
         myObstacles.push(upperObstacle);
