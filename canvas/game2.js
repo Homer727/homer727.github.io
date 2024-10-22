@@ -180,7 +180,16 @@ function updateGameArea() {
         maxGap = 200;
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
         myObstacles.push(new component(10, height, "red", x, 0));
-        myObstacles.push(new component(10, x - height - gap, "Laser-Beam-PNG-HD-Image.png", x, height + gap));
+        myObstacles.push(new component(10, x - height - gap, "red", x, height + gap));
+
+        var upperObstacle = new gameObject(10, height, "Laser-Beam-PNG-HD-Image.png", x, 0, "obstacle");
+        upperObstacle.angle = Math.PI/2; // Rotate 90 degrees
+        myObstacles.push(upperObstacle);
+
+         var lowerObstacle = new gameObject(10, x - height - gap, "Laser-Beam-PNG-HD-Image.png", x, height + gap, "obstacle");
+         myObstacles.push(lowerObstacle);
+         upperObstacle.angle = Math.PI/2; // Rotate 90 degrees
+
     }
 
     for (i = 0; i < myObstacles.length; i += 1) {
