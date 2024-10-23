@@ -104,12 +104,15 @@ function component(width, height, type, x, y, src) {
             } else if (src === "Laser-Beam-PNG-HD-Image.png") {
                 // Only rotate and stretch the laser beam obstacles, not other components
                 ctx.save();
+                
+                // Move the origin to the obstacle's center and rotate 90 degrees
                 ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-                ctx.rotate(Math.PI / 2); // Rotate 90 degrees
-                
-                // Stretch the laser image to fit the width and height of the obstacle
+                ctx.rotate(Math.PI / 2); // Rotate 90 degrees clockwise
+
+                // Stretch the laser image to match the size of the obstacle
+                // Adjust to stretch along the obstacle dimensions
                 ctx.drawImage(this.image, -this.height / 2, -this.width / 2, this.height, this.width);
-                
+
                 ctx.restore();
             } else {
                 // Draw all other images normally
@@ -152,6 +155,7 @@ function component(width, height, type, x, y, src) {
         return crash;
     };
 }
+
 
 function updateGameArea() {
     if (isPaused) return;
