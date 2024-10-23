@@ -156,7 +156,6 @@ function component(width, height, type, x, y, src) {
     };
 }
 
-
 function updateGameArea() {
     if (isPaused) return;
 
