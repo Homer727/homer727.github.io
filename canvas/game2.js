@@ -84,6 +84,7 @@ function component(width, height, type, x, y, src) {
     this.y = y;
     this.speedX = 0;
     this.speedY = 0;
+    this.image = null;
 
     if (type === "image" || type === "background") {
         this.image = new Image();
@@ -91,19 +92,20 @@ function component(width, height, type, x, y, src) {
         this.image.onload = () => {
             this.loaded = true;
         };
+
         this.update = function() {
             if (this.loaded) {
                 ctx = myGameArea.context;
 
                 if (src === "Laser-Beam-PNG-HD-Image.png") {
-                    // Rotate the laser image only
+                    // Apply rotation only to laser beam obstacles
                     ctx.save();
-                    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-                    ctx.rotate(Math.PI / 2);
-                    ctx.drawImage(this.image, -this.height / 2, -this.width / 2, this.height, this.width);
+                    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);  // Move to the center of the obstacle
+                    ctx.rotate(Math.PI / 2);  // Rotate 90 degrees
+                    ctx.drawImage(this.image, -this.height / 2, -this.width / 2, this.height, this.width);  // Draw rotated image
                     ctx.restore();
                 } else {
-                    // For all other images, including the spaceship and background
+                    // For all other images, draw them normally
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 }
             }
@@ -120,6 +122,7 @@ function component(width, height, type, x, y, src) {
         this.x += this.speedX;
         this.y += this.speedY;
 
+        // Reset background position for scrolling effect
         if (type === "background") {
             if (this.x <= -this.width) {
                 this.x = 0;
