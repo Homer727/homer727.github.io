@@ -94,24 +94,23 @@ function component(width, height, type, x, y, src) {
         };
 
         this.update = function() {
-            if (this.loaded) {
-                ctx = myGameArea.context;
+            ctx = myGameArea.context;
 
-                if (type === "background") {
-                    // Draw two images to create a looping background effect
-                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                    ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
-                } else if (src === "Laser-Beam-PNG-HD-Image.png") {
-                    // Apply rotation only to laser beam obstacles
-                    ctx.save();
-                    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);  // Move to the center of the obstacle
-                    ctx.rotate(Math.PI / 2);  // Rotate 90 degrees
-                    ctx.drawImage(this.image, -this.height / 2, -this.width / 2, this.height, this.width);  // Draw rotated image
-                    ctx.restore();
-                } else {
-                    // For all other images, draw them normally
-                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                }
+            // Handle background separately to ensure proper looping without rotation
+            if (this.type === "background") {
+                // Draw two images for seamless looping
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
+            } else if (src === "Laser-Beam-PNG-HD-Image.png") {
+                // Only rotate the laser beam obstacles, not other components
+                ctx.save();
+                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                ctx.rotate(Math.PI / 2); // Rotate 90 degrees
+                ctx.drawImage(this.image, -this.height / 2, -this.width / 2, this.height, this.width); 
+                ctx.restore();
+            } else {
+                // Draw all other images normally
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
             }
         };
     } else {
@@ -126,8 +125,8 @@ function component(width, height, type, x, y, src) {
         this.x += this.speedX;
         this.y += this.speedY;
 
-        // Reset background position for scrolling effect
-        if (type === "background") {
+        // If background, reset x position for seamless scrolling
+        if (this.type === "background") {
             if (this.x <= -this.width) {
                 this.x = 0;
             }
@@ -151,7 +150,6 @@ function component(width, height, type, x, y, src) {
     };
 }
 
-
 function updateGameArea() {
     if (isPaused) return;
 
@@ -169,7 +167,8 @@ function updateGameArea() {
     myGameArea.clear();
     myGameArea.frameNo += 1;
 
-    background.speedX = -1;
+    // Update background
+    background.speedX = -1; // Background scroll speed
     background.newPos();
     background.update();
 
@@ -182,11 +181,11 @@ function updateGameArea() {
         minGap = 50;
         maxGap = 200;
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-        
+
         // Create upper and lower obstacles with the laser beam image
         var upperObstacle = new component(40, height, "image", x, 0, "Laser-Beam-PNG-HD-Image.png");
-        var lowerObstacle = new component(40, myGameArea.canvas.height - height - gap, "image", x, height + gap, "Laser-Beam-PNG-HD-Image.png");
-        
+        var lowerObstacle = new component(40, x - height - gap, "image", x, height + gap, "Laser-Beam-PNG-HD-Image.png");
+
         // Add obstacles to the array
         myObstacles.push(upperObstacle);
         myObstacles.push(lowerObstacle);
