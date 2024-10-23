@@ -102,11 +102,14 @@ function component(width, height, type, x, y, src) {
                 ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
             } else if (src === "Laser-Beam-PNG-HD-Image.png") {
-                // Only rotate the laser beam obstacles, not other components
+                // Only rotate and stretch the laser beam obstacles, not other components
                 ctx.save();
                 ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
                 ctx.rotate(Math.PI / 2); // Rotate 90 degrees
-                ctx.drawImage(this.image, -this.height / 2, -this.width / 2, this.height, this.width); 
+                
+                // Stretch the laser image to fit the width and height of the obstacle
+                ctx.drawImage(this.image, -this.height / 2, -this.width / 2, this.height, this.width);
+                
                 ctx.restore();
             } else {
                 // Draw all other images normally
