@@ -94,21 +94,18 @@ function component(width, height, type, x, y, src) {
         this.update = function() {
             if (this.loaded) {
                 ctx = myGameArea.context;
-                
-                // Save the current canvas state
-                ctx.save();
-                
-                // Move the canvas origin to the center of the image
-                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-                
-                // Rotate the image by 90 degrees (in radians, that's π/2)
-                ctx.rotate(Math.PI / 2);
-                
-                // Draw the image, adjusting the position after rotation
-                ctx.drawImage(this.image, -this.height / 2, -this.width / 2, this.height, this.width);
-                
-                // Restore the canvas state to avoid affecting other drawings
-                ctx.restore();
+
+                if (src === "Laser-Beam-PNG-HD-Image.png") {
+                    // Rotate the laser image only
+                    ctx.save();
+                    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                    ctx.rotate(Math.PI / 2);
+                    ctx.drawImage(this.image, -this.height / 2, -this.width / 2, this.height, this.width);
+                    ctx.restore();
+                } else {
+                    // For all other images, including the spaceship and background
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                }
             }
         };
     } else {
