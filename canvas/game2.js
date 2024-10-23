@@ -97,7 +97,11 @@ function component(width, height, type, x, y, src) {
             if (this.loaded) {
                 ctx = myGameArea.context;
 
-                if (src === "Laser-Beam-PNG-HD-Image.png") {
+                if (type === "background") {
+                    // Draw two images to create a looping background effect
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                    ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
+                } else if (src === "Laser-Beam-PNG-HD-Image.png") {
                     // Apply rotation only to laser beam obstacles
                     ctx.save();
                     ctx.translate(this.x + this.width / 2, this.y + this.height / 2);  // Move to the center of the obstacle
@@ -146,6 +150,7 @@ function component(width, height, type, x, y, src) {
         return crash;
     };
 }
+
 
 function updateGameArea() {
     if (isPaused) return;
